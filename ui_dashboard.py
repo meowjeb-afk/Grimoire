@@ -90,4 +90,17 @@ class GrimoireMirror(QMainWindow):
 
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.MouseButton.LeftButton:
-            self.move(event.globalPosition().toPoint() - self.drag_
+            self.move(event.globalPosition().toPoint() - self.drag_position)
+            event.accept()
+
+    def init_custom_title_bar(self, parent_layout):
+        """Constructs a beautifully stylized title bar replacing the default Windows frame layout."""
+        self.title_bar = QFrame()
+        self.title_bar.setObjectName("CustomTitleBar")
+        title_layout = QHBoxLayout(self.title_bar)
+        title_layout.setContentsMargins(15, 6, 12, 6)
+        title_layout.setSpacing(8)
+        
+        # Window Label / Title
+        window_title = QLabel("🔮 Grimoire Master OS Shell Extension")
+        window_title.setStyleSheet("color: #a397bf; font-family: '
