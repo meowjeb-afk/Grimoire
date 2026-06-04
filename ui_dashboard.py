@@ -33,8 +33,8 @@ class ArcaneWorker(QThread):
 class GrimoireMirror(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Grimoire Master OS Shell Extension")
-        self.setFixedSize(1020, 760)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
         # Main Window Layout Split
         self.main_widget = QWidget()
