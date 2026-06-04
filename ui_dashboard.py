@@ -396,4 +396,4 @@ class GrimoireMirror(QMainWindow):
         card_sliders, layout_sliders = self.create_card("Pixelation Modulator", "Matrix Transformation")
         layout_sliders.addWidget(QLabel("Pixel Size Filter Scale:"))
         self.slider_pixel = QSlider(Qt.Orientation.Horizontal)
-        self.slider_pixel.setRange(2, 32
+        self.slider_pixel.setRange(2, 32)
