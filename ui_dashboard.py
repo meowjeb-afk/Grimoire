@@ -1,14 +1,14 @@
 import sys
 import json
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QCheckBox, QTabWidget, QLineEdit
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QCheckBox, QTabWidget, QLineEdit, QTextEdit
 from PyQt6.QtCore import Qt
-from incantations import file_alchemy, asset_summoner, workspace_stasis
+from incantations import file_alchemy, asset_summoner, workspace_stasis, updater_scryer, purge_debloat
 
 class GrimoireMirror(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Grimoire Dashboard")
-        self.setFixedSize(500, 400)
+        self.setFixedSize(550, 450)
         
         # Core Tabs Architecture
         self.tabs = QTabWidget()
@@ -16,6 +16,7 @@ class GrimoireMirror(QMainWindow):
         
         self.init_core_tab()
         self.init_alchemy_tab()
+        self.init_tuning_tab() # Added Tuning Layer
         self.apply_theme()
 
     def init_core_tab(self):
@@ -69,6 +70,41 @@ class GrimoireMirror(QMainWindow):
         
         self.tabs.addTab(page, "Manual Alchemy")
 
+    def init_tuning_tab(self):
+        """NEW PANEL: Controls system maintenance, software scrying, and debloating routines."""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setSpacing(10)
+        
+        layout.addWidget(QLabel("System Scryer Output Status:"))
+        self.console_out = QTextEdit()
+        self.console_out.setReadOnly(True)
+        self.console_out.setPlaceholderText("Scan outputs will manifest here...")
+        layout.addWidget(self.console_out)
+        
+        # Action Grid Layout
+        btn_layout = QHBoxLayout()
+        btn_scan = QPushButton("Scan for App Updates")
+        btn_update = QPushButton("Cast Global Upgrades")
+        btn_layout.addWidget(btn_scan)
+        btn_layout.addWidget(btn_update)
+        layout.addLayout(btn_layout)
+        
+        debloat_layout = QHBoxLayout()
+        btn_telemetry = QPushButton("Banish Telemetry")
+        btn_bloat = QPushButton("Purge Bloatware")
+        debloat_layout.addWidget(btn_telemetry)
+        debloat_layout.addWidget(btn_bloat)
+        layout.addLayout(debloat_layout)
+        
+        # UI Event Routing Connections
+        btn_scan.clicked.connect(lambda: self.console_out.setText(updater_scryer.scan_for_updates()))
+        btn_update.clicked.connect(lambda: self.console_out.setText(updater_scryer.cast_all_upgrades()))
+        btn_telemetry.clicked.connect(lambda: self.console_out.setText(purge_debloat.banish_telemetry()))
+        btn_bloat.clicked.connect(lambda: self.console_out.setText(purge_debloat.purge_bloatware()))
+        
+        self.tabs.addTab(page, "Arcane Tuning")
+
     def save_settings(self):
         try:
             with open("database/runes.json", "r") as f:
@@ -92,6 +128,7 @@ class GrimoireMirror(QMainWindow):
             QLabel { color: #ffffff; font-family: 'Segoe UI'; font-size: 13px; }
             QCheckBox { color: #e0e0e0; }
             QLineEdit { background-color: #1c1c24; color: white; border: 1px solid #333344; border-radius: 4px; padding: 4px; }
+            QTextEdit { background-color: #1c1c24; color: #00ffcc; border: 1px solid #333344; font-family: 'Consolas'; font-size: 12px; }
             QPushButton { background-color: #00ffcc; color: #111116; font-weight: bold; border-radius: 5px; padding: 8px; }
             QPushButton:hover { background-color: #00ccaa; }
         """)
