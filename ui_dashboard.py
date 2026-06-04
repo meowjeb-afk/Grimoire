@@ -3,13 +3,13 @@ import json
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QPushButton, QLabel, QCheckBox, QTabWidget, 
-    QLineEdit, QTextEdit
+    QLineEdit, QTextEdit, QComboBox
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from incantations import (
     file_alchemy, asset_summoner, workspace_stasis, 
     updater_scryer, purge_debloat, arcane_intel, 
-    scry_search, void_shield, ecosystem_summoner
+    scry_search, void_shield, ecosystem_summoner, image_matrix
 )
 
 class ArcaneWorker(QThread):
@@ -32,13 +32,14 @@ class GrimoireMirror(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Grimoire Complete Optimization Suite")
-        self.setFixedSize(600, 560)  # Height increased slightly to comfortably frame the workspace summoner
+        self.setFixedSize(650, 580)
         
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
         
         self.init_core_tab()
         self.init_alchemy_tab()
+        self.init_image_tab() # Integrated Image Workspace Layer
         self.init_tuning_tab()
         self.apply_theme()
 
@@ -99,11 +100,44 @@ class GrimoireMirror(QMainWindow):
         
         self.tabs.addTab(page, "File Alchemy")
 
+    def init_image_tab(self):
+        """NEW PANEL: Drives asset manipulation routines including conversions and background cuts."""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setSpacing(12)
+        
+        layout.addWidget(QLabel("Target Visual Asset Image Path (PNG / JPG / WEBP):"))
+        self.txt_img_path = QLineEdit(r"C:\Users\Public\Downloads\asset.png")
+        layout.addWidget(self.txt_img_path)
+        
+        btn_bg = QPushButton("Erase Image Background (Produce Transparent Alpha PNG)")
+        btn_bg.clicked.connect(lambda: self.cast_asynchronously(image_matrix.erase_background, self.txt_img_path.text()))
+        layout.addWidget(btn_bg)
+        
+        btn_scale = QPushButton("Execute AI Lanczos Remaster & 2x Detail Upscale")
+        btn_scale.clicked.connect(lambda: self.cast_asynchronously(image_matrix.remaster_and_upscale, self.txt_img_path.text(), 2))
+        layout.addWidget(btn_scale)
+        
+        # Format Mutation Core Box Layout Elements
+        conv_layout = QHBoxLayout()
+        conv_layout.addWidget(QLabel("Convert Asset Matrix Configuration to:"))
+        self.cmb_format = QComboBox()
+        self.cmb_format.addItems(["PNG", "JPEG", "WEBP", "ICO"])
+        conv_layout.addWidget(self.cmb_format)
+        
+        btn_convert = QPushButton("Cast Format Conversion")
+        btn_convert.clicked.connect(lambda: self.cast_asynchronously(
+            image_matrix.convert_format, self.txt_img_path.text(), self.cmb_format.currentText()
+        ))
+        conv_layout.addWidget(btn_convert)
+        layout.addLayout(conv_layout)
+        
+        self.tabs.addTab(page, "Visual Alchemy")
+
     def init_tuning_tab(self):
         page = QWidget()
         layout = QVBoxLayout(page)
         
-        # --- ECOSYSTEM SUMMONING ZONE ---
         ecosystem_layout = QVBoxLayout()
         eco_header = QLabel("🔮 ECOSYSTEM TRANSMUTATION MATRIX")
         eco_header.setStyleSheet("color: #00ffcc; font-weight: bold; margin-top: 5px;")
@@ -156,6 +190,8 @@ class GrimoireMirror(QMainWindow):
             QTabBar::tab:selected { background: #0c0a0f; color: #00ffcc; border-bottom: 2px solid #00ffcc; }
             QLabel { color: #e2dfec; font-family: 'Segoe UI'; font-size: 13px; }
             QCheckBox { color: #c3bed0; }
+            QComboBox { background-color: #15121a; color: white; border: 1px solid #2d2638; border-radius: 4px; padding: 4px; min-width: 70px; }
+            QComboBox QAbstractItemView { background-color: #15121a; color: white; selection-background-color: #00ffcc; selection-color: #0c0a0f; }
             QLineEdit { background-color: #15121a; color: white; border: 1px solid #2d2638; border-radius: 4px; padding: 5px; }
             QTextEdit { background-color: #060507; color: #00ffcc; border: 1px solid #2d2638; font-family: 'Consolas'; font-size: 11px; }
             QPushButton { background-color: #00ffcc; color: #0c0a0f; font-weight: bold; border-radius: 4px; padding: 10px; }
