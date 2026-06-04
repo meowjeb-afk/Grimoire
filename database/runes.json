@@ -5,5 +5,16 @@
   "text_expansion": true,
   "void_shield_active": false,
   "ai_model": "llama3",
-  "saved_workspace_windows": []
+  "saved_workspace_windows": [],
+  "ecosystem_bundle": [
+    "Microsoft.VisualStudioCode",
+    "Git.Git",
+    "Python.Python.3.11",
+    "BlenderFoundation.Blender",
+    "Prusa3D.PrusaSlicer",
+    "Discord.Discord",
+    "Steam.Steam",
+    "GIMP.GIMP",
+    "OBSProject.OBSStudio"
+  ]
 }
