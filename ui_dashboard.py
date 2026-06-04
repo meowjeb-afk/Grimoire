@@ -517,7 +517,7 @@ class GrimoireMirror(QMainWindow):
         self.workspace_stack.addTab(page, "Arcane Tuning")
 
     def apply_theme(self):
-        self.setStyleSheet(\"\"\"
+        self.setStyleSheet("""
             QWidget#MainContainer {
                 background-color: #0b0813;
                 border: 1px solid #1f1833;
@@ -646,7 +646,7 @@ class GrimoireMirror(QMainWindow):
                 font-family: 'Segoe UI';
                 font-size: 11px;
             }
-        \"\"\")
+        """)
 
 if __name__ == "__main__":
     from PyQt6.QtWidgets import QApplication
