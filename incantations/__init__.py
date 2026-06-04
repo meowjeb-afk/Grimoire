@@ -12,3 +12,12 @@ from .scry_search import *
 from .void_shield import *
 from .ecosystem_summoner import *
 from .image_matrix import *
+from .system_monitors import *
+from .deep_cleaner import *
+from .design_forge import *
+from .layout_runes import *
+from .browser_alchemy import *
+from .desktop_dock import *
+from .window_anchors import * # Added
+from .process_hunter import * # Added
+from .persistent_bans import * # Added
