@@ -1,3 +1,4 @@
+# File: ui_dashboard.py
 import sys
 import json
 from PyQt6.QtWidgets import (
@@ -11,7 +12,8 @@ from incantations import (
     updater_scryer, purge_debloat, arcane_intel, 
     scry_search, void_shield, ecosystem_summoner, 
     image_matrix, system_monitors, deep_cleaner, 
-    design_forge, layout_runes, browser_alchemy, desktop_dock
+    design_forge, layout_runes, browser_alchemy, desktop_dock,
+    window_anchors, process_hunter, persistent_bans
 )
 
 class ArcaneWorker(QThread):
@@ -31,7 +33,7 @@ class GrimoireMirror(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Grimoire Master OS Shell Extension")
-        self.setFixedSize(700, 620)
+        self.setFixedSize(720, 640)
         
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
@@ -39,6 +41,7 @@ class GrimoireMirror(QMainWindow):
         self.init_core_tab()
         self.init_alchemy_tab()
         self.init_image_tab()
+        self.init_window_tab() # Integrated PowerToys Window Tools Layer
         self.init_cleaner_tab()
         self.init_creative_tab()
         self.init_browser_tab()
@@ -71,7 +74,6 @@ class GrimoireMirror(QMainWindow):
         btn_sweep = QPushButton("Force kernel Memory RAM Sweeper Action")
         btn_sweep.clicked.connect(lambda: self.cast_asynchronously(system_monitors.sweep_system_ram))
         layout.addWidget(btn_sweep)
-        
         self.tabs.addTab(page, "System Monitor")
 
     def init_alchemy_tab(self):
@@ -120,20 +122,49 @@ class GrimoireMirror(QMainWindow):
         layout.addLayout(conv_layout)
         self.tabs.addTab(page, "Visual Alchemy")
 
+    def init_window_tab(self):
+        """NEW PANEL: Controls Advanced Window Layers and Transparency Maps Natively."""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.addWidget(QLabel("🪟 ACTIVE WINDOW FRAME OVERLAYS & CANVAS CONTROLS"))
+        
+        btn_pin = QPushButton("Pin Current Active Window Frame to 'Always On Top'")
+        btn_pin.clicked.connect(lambda: self.cast_asynchronously(window_anchors.pin_active_window))
+        layout.addWidget(btn_pin)
+        
+        btn_unpin = QPushButton("Unpin Active Window Frame (Restore Default OS Layering)")
+        btn_unpin.clicked.connect(lambda: self.cast_asynchronously(window_anchors.unpin_active_window))
+        layout.addWidget(btn_unpin)
+        
+        trans_layout = QHBoxLayout()
+        trans_layout.addWidget(QLabel("Transmute Active Window Opacity Scale:"))
+        self.cmb_opacity = QComboBox()
+        self.cmb_opacity.addItems(["220 (Light Translucent)", "170 (Medium Glass)", "120 (Deep Phantom)"])
+        trans_layout.addWidget(self.cmb_opacity)
+        
+        btn_opacity = QPushButton("Apply Transparency Effect")
+        btn_opacity.clicked.connect(lambda: self.cast_asynchronously(
+            window_anchors.cast_window_opacity, 
+            int(self.cmb_opacity.currentText().split()[0])
+        ))
+        trans_layout.addWidget(btn_opacity)
+        layout.addLayout(trans_layout)
+        self.tabs.addTab(page, "Window Anchors")
+
     def init_cleaner_tab(self):
         page = QWidget()
         layout = QVBoxLayout(page)
-        header = QLabel("DEEP OS PURGE & MAINTENANCE VECTORS")
-        header.setStyleSheet("color: #ff007f; font-weight: bold;")
-        layout.addWidget(header)
         
         btn_temp = QPushButton("Scrub Temp Vaults & Application Cache Residue")
         btn_temp.clicked.connect(lambda: self.cast_asynchronously(deep_cleaner.scrub_temp_vaults))
         layout.addWidget(btn_temp)
         
-        btn_reg = QPushButton("Scan Registry shortcuts and Fix Missing Link Matrix Keys")
-        btn_reg.clicked.connect(lambda: self.cast_asynchronously(deep_cleaner.clear_broken_registry_keys))
-        layout.addWidget(btn_reg)
+        layout.addWidget(QLabel("Target Frozen Process Image Name (e.g., Unity.exe / Slicer.exe):"))
+        self.txt_kill = QLineEdit("Application.exe")
+        layout.addWidget(self.txt_kill)
+        btn_kill = QPushButton("🎯 Force Kill Stuck Process Tree and Unlock Related Handles")
+        btn_kill.clicked.connect(lambda: self.cast_asynchronously(process_hunter.scavenge_and_kill_process, self.txt_kill.text()))
+        layout.addWidget(btn_kill)
         
         layout.addWidget(QLabel("Aggressive Application Forced Uninstaller Tool:"))
         self.txt_uninstaller = QLineEdit("BloatedAppName")
@@ -155,10 +186,6 @@ class GrimoireMirror(QMainWindow):
         btn_tex.clicked.connect(lambda: self.cast_asynchronously(design_forge.craft_procedural_texture))
         layout.addWidget(btn_tex)
         
-        btn_fav = QPushButton("Convert Target Asset Image Pathway Into production Multi-Size Favicon")
-        btn_fav.clicked.connect(lambda: self.cast_asynchronously(design_forge.build_favicon, self.txt_img_path.text()))
-        layout.addWidget(btn_fav)
-        
         btn_fonts = QPushButton("Catalog Installed System Fonts")
         btn_fonts.clicked.connect(lambda: self.cast_asynchronously(layout_runes.scry_installed_fonts))
         layout.addWidget(btn_fonts)
@@ -172,7 +199,6 @@ class GrimoireMirror(QMainWindow):
         btn_paper.clicked.connect(lambda: self.cast_asynchronously(layout_runes.get_paper_spec, self.cmb_paper.currentText()))
         paper_layout.addWidget(btn_paper)
         layout.addLayout(paper_layout)
-        
         self.tabs.addTab(page, "Design Forge")
 
     def init_browser_tab(self):
@@ -195,9 +221,9 @@ class GrimoireMirror(QMainWindow):
         btn_summon.clicked.connect(lambda: self.cast_asynchronously(ecosystem_summoner.summon_bundle))
         layout.addWidget(btn_summon)
         
-        btn_dock = QPushButton("Spawn Floating SparkleDock Desktop Shortcut Bar Overlay")
-        btn_dock.clicked.connect(lambda: self.cast_asynchronously(desktop_dock.summon_sparkle_dock))
-        layout.addWidget(btn_dock)
+        btn_policies = QPushButton("🔒 Inject Registry Explorer Policy Guards Against Auto-Bloatware Reinstalls")
+        btn_policies.clicked.connect(lambda: self.cast_asynchronously(persistent_bans.freeze_windows_bloatware_policies))
+        layout.addWidget(btn_policies)
         
         debloat_layout = QHBoxLayout()
         btn_telemetry = QPushButton("Banish Telemetry")
@@ -212,11 +238,9 @@ class GrimoireMirror(QMainWindow):
         shield_layout.addWidget(btn_shield_on)
         shield_layout.addWidget(btn_shield_off)
         layout.addLayout(shield_layout)
-        
         self.tabs.addTab(page, "Arcane Tuning")
 
     def apply_theme(self):
-        # Master Console Log Module Placement Inside Interface Base Floor Frame Layout
         central_widget = self.centralWidget()
         master_layout = QVBoxLayout()
         master_layout.addWidget(self.tabs)
