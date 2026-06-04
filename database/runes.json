@@ -3,6 +3,7 @@
   "active_theme": "Gothic Dark",
   "clipboard_automation": true,
   "text_expansion": true,
-  "wallpaper_cycle_minutes": 60,
+  "void_shield_active": false,
+  "ai_model": "llama3",
   "saved_workspace_windows": []
 }
