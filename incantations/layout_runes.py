@@ -1,20 +1,24 @@
-import tkinter as tk
-from tkinter import font
+# File: incantations/layout_runes.py
+from PIL import Image, ImageDraw, ImageFont
 
-def scry_installed_fonts():
-    """Queries the OS engine to catalog every accessible font family name."""
-    root = tk.Tk()
-    root.withdraw()
-    system_fonts = sorted(list(font.families()))
-    root.destroy()
-    return "\n".join(system_fonts[:20]) + f"\n...and {len(system_fonts)-20} more fonts cataloged."
-
-def get_paper_spec(size_name):
-    """Returns the precise physical blueprint dimensions for manufacturing layouts."""
-    specs = {
-        "A4": "210 x 297 mm | 8.3 x 11.7 inches (Standard Print)",
-        "A3": "297 x 420 mm | 11.7 x 16.5 inches (Poster Matrix)",
-        "A5": "148 x 210 mm | 5.8 x 8.3 inches (Booklet/Zine Manual)",
-        "Letter": "215.9 x 279.4 mm | 8.5 x 11.0 inches (Legacy Document)"
-    }
-    return specs.get(size_name.strip(), "🍂 Unknown layout size definition.")
+def draw_procedural_logo(text="GRIMOIRE", radius_size=20, border_thickness=4):
+    """Generates a high-fidelity vector-style logo bounding layout based on image_249083.png aesthetics."""
+    # Build canvas asset frame
+    img = Image.new("RGBA", (500, 150), (22, 19, 28, 255))
+    draw = ImageDraw.Draw(img)
+    
+    # Draw rounded pill bounding frame container layout
+    draw.rounded_rectangle(
+        [10, 10, 490, 140], 
+        radius=radius_size, 
+        fill=(12, 10, 15, 255), 
+        outline=(0, 255, 204, 255), 
+        width=border_thickness
+    )
+    
+    # Render fallback graphical typography
+    draw.text((250, 75), text, fill=(255, 255, 255, 255), anchor="mm", font=None)
+    
+    out_path = r"C:\Users\Public\Grimoire_Procedural_Logo.png"
+    img.save(out_path)
+    return f"🎨 Logo template vector canvas constructed at: {out_path}"
