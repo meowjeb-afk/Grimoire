@@ -7,8 +7,8 @@ from PyQt6.QtWidgets import (
     QPushButton, QLabel, QCheckBox, QTabWidget, 
     QLineEdit, QTextEdit, QComboBox, QFrame, QSlider
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint, QTimer
-from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QBrush, QConicalGradient
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint, QTimer, QSize
+from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QBrush, QConicalGradient, QPainterPath, QFont
 
 class ArcaneWorker(QThread):
     manifest_complete = pyqtSignal(str)
@@ -22,6 +22,47 @@ class ArcaneWorker(QThread):
             self.manifest_complete.emit(str(output) if output else "Sequence completed smoothly.")
         except Exception as e:
             self.manifest_complete.emit(f"Sequence Error: {e}")
+
+class GrimoireVectorLogo(QWidget):
+    """Custom vector-drawn branding icon replicating the exact line-art book and crescent sweep style."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(36, 36)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Define the vibrant custom brand colors
+        teal_glow = QColor("#61ffcf")
+        
+        # 1. Draw the magical sweeping arc over the book
+        arc_pen = QPen(teal_glow, 1.75, Qt.PenStyle.SolidLine, Qt.PenCapStyle.Round)
+        painter.setPen(arc_pen)
+        painter.drawArc(4, 4, 28, 28, 45 * 16, 190 * 16)
+        
+        # 2. Draw the Stylized Line-Art Book Spine & Cover
+        book_path = QPainterPath()
+        # Front Cover & Pages Profile
+        book_path.moveTo(10, 28)
+        book_path.lineTo(10, 14)
+        book_path.quadTo(12, 11, 16, 12)
+        book_path.lineTo(26, 8)
+        book_path.lineTo(26, 22)
+        book_path.quadTo(16, 25, 10, 28)
+        
+        # Spine & Base Base
+        book_path.moveTo(10, 14)
+        book_path.quadTo(16, 16, 26, 12)
+        book_path.moveTo(10, 28)
+        book_path.lineTo(26, 22)
+        
+        # Accent ribbon/bookmark leaf peeking down
+        book_path.moveTo(16, 23)
+        book_path.lineTo(16, 29)
+        book_path.lineTo(13, 27)
+        
+        painter.drawPath(book_path)
 
 class ArcaneSystemVisualizer(QWidget):
     """Custom vector-drawn visualizer replacing the plain text logger with a dynamic matrix canvas."""
@@ -99,14 +140,11 @@ class GrimoireMirror(QMainWindow):
         self.setWindowTitle("Grimoire Master OS Shell Extension")
         self.setFixedSize(1040, 780)
         
-        # Strip native OS title bar frame
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
-        # Variables to track mouse movement for window dragging
         self.drag_position = QPoint()
 
-        # Main Window Base Layout
         self.main_container = QWidget()
         self.main_container.setObjectName("MainContainer")
         self.setCentralWidget(self.main_container)
@@ -115,27 +153,21 @@ class GrimoireMirror(QMainWindow):
         master_vertical.setContentsMargins(0, 0, 0, 0)
         master_vertical.setSpacing(0)
         
-        # 1. Inject Custom Immersive Title Bar Component
         self.init_custom_title_bar(master_vertical)
         
-        # 2. Main Content Split Panel (Sidebar + Workspaces + Preview)
         content_layout = QHBoxLayout()
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
         master_vertical.addLayout(content_layout)
         
-        # Initialize Left Navigation Sidebar
         self.init_sidebar(content_layout)
         
-        # Main Workspace Page Stack
         self.workspace_stack = QTabWidget()
-        self.workspace_stack.tabBar().hide() # Hide default tab bar headers
+        self.workspace_stack.tabBar().hide()
         content_layout.addWidget(self.workspace_stack, stretch=3)
         
-        # Initialize Right Side Real-time Image Preview Dock
         self.init_right_preview_panel(content_layout)
         
-        # Initialize Individual Module Views
         self.init_core_tab()
         self.init_alchemy_tab()
         self.init_image_tab()
@@ -145,7 +177,6 @@ class GrimoireMirror(QMainWindow):
         
         self.apply_theme()
 
-    # --- Frameless Window Dragging Mathematics ---
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
@@ -157,28 +188,24 @@ class GrimoireMirror(QMainWindow):
             event.accept()
 
     def init_custom_title_bar(self, parent_layout):
-        """Constructs a beautifully stylized title bar replacing the default Windows frame layout."""
         self.title_bar = QFrame()
         self.title_bar.setObjectName("CustomTitleBar")
         title_layout = QHBoxLayout(self.title_bar)
         title_layout.setContentsMargins(15, 6, 12, 6)
         title_layout.setSpacing(8)
         
-        # Window Label / Title
         window_title = QLabel("🔮 Grimoire Master OS Shell Extension")
         title_style = "color: #a397bf; font-family: 'Segoe UI'; font-weight: bold; font-size: 11px; letter-spacing: 0.5px;"
         window_title.setStyleSheet(title_style)
         title_layout.addWidget(window_title)
         title_layout.addStretch()
         
-        # Minimize Window Control Action
         btn_min = QPushButton("🗕")
         btn_min.setObjectName("TitleMinButton")
         btn_min.setFixedSize(28, 24)
         btn_min.clicked.connect(self.showMinimized)
         title_layout.addWidget(btn_min)
         
-        # Close Window Control Action
         btn_close = QPushButton("🗙")
         btn_close.setObjectName("TitleCloseButton")
         btn_close.setFixedSize(28, 24)
@@ -188,45 +215,53 @@ class GrimoireMirror(QMainWindow):
         parent_layout.addWidget(self.title_bar)
 
     def init_sidebar(self, parent_layout):
-        """Builds the left vertical navigation deck with custom brand layout styling."""
+        """Constructs the sidebar navigation panel using the direct code-generated logo framework."""
         self.sidebar_frame = QFrame()
         self.sidebar_frame.setObjectName("SidebarDock")
         sidebar_layout = QVBoxLayout(self.sidebar_frame)
         sidebar_layout.setContentsMargins(16, 24, 16, 24)
         sidebar_layout.setSpacing(8)
         
-        # Custom Brand Header Row Layout Container
-        brand_container = QWidget()
-        brand_container.setObjectName("BrandContainer")
-        brand_row = QHBoxLayout(brand_container)
-        brand_row.setContentsMargins(8, 0, 8, 20)
-        brand_row.setSpacing(10)
+        # Master Branding Layout Container
+        brand_box = QHBoxLayout()
+        brand_box.setContentsMargins(4, 0, 4, 24)
+        brand_box.setSpacing(12)
         
-        # Graphic Vector Asset Box Loader
-        logo_label = QLabel()
-        logo_label.setFixedSize(24, 24)
+        # Inject Vector Logo Instance directly
+        vector_logo = GrimoireVectorLogo()
+        brand_box.addWidget(vector_logo, alignment=Qt.AlignmentFlag.AlignVCenter)
         
-        # Dynamically matches folder architecture paths gracefully
-        potential_paths = ["logo.jpeg", "logo.png", "1780596567735-019e93d2-e88e-7b68-bc45-5e0829a9cb59.jpeg"]
-        logo_path = next((p for p in potential_paths if os.path.exists(p)), None)
+        # Construct Two-Tier Text Stack Layout
+        text_stack = QVBoxLayout()
+        text_stack.setSpacing(1)
+        text_stack.setContentsMargins(0, 0, 0, 0)
         
-        if logo_path:
-            pix = QPixmap(logo_path)
-            logo_label.setPixmap(pix.scaled(24, 24, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-        else:
-            # High-fidelity fallback glyph box matching palette hues
-            logo_label.setText("🟢")
-            logo_label.setStyleSheet("font-size: 16px;")
-            
-        brand_row.addWidget(logo_label)
+        title_text = QLabel("Grimoire")
+        title_text.setStyleSheet("""
+            font-size: 20px; 
+            font-weight: 800; 
+            color: #c299ff; 
+            font-family: 'Segoe UI', -apple-system; 
+            letter-spacing: -0.2px;
+            line-height: 100%;
+        """)
         
-        # Stylized Bold Branding Typography Label
-        brand_text = QLabel("Grimoire")
-        brand_text.setStyleSheet("font-size: 18px; font-weight: 800; color: #ffffff; font-family: 'Segoe UI', -apple-system; letter-spacing: -0.3px;")
-        brand_row.addWidget(brand_text)
-        brand_row.addStretch()
+        subtitle_text = QLabel("Master OS")
+        subtitle_text.setStyleSheet("""
+            font-size: 11px; 
+            font-weight: 600; 
+            color: #61ffcf; 
+            font-family: 'Segoe UI', -apple-system; 
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        """)
         
-        sidebar_layout.addWidget(brand_container)
+        text_stack.addWidget(title_text)
+        text_stack.addWidget(subtitle_text)
+        
+        brand_box.addLayout(text_stack)
+        brand_box.addStretch()
+        sidebar_layout.addLayout(brand_box)
         
         self.nav_buttons = []
         modules = [
@@ -249,4 +284,162 @@ class GrimoireMirror(QMainWindow):
         sidebar_layout.addStretch()
         
         footer_tag = QLabel("v2.4.1")
-        footer_style = "color: #4a3e63;
+        footer_style = "color: #4a3e63; font-size: 10px; font-family: 'Consolas'; font-weight: bold;"
+        footer_tag.setStyleSheet(footer_style)
+        footer_tag.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        sidebar_layout.addWidget(footer_tag)
+        
+        parent_layout.addWidget(self.sidebar_frame, stretch=0)
+
+    def switch_workspace_view(self, index):
+        self.workspace_stack.setCurrentIndex(index)
+        for i, btn in enumerate(self.nav_buttons):
+            btn.setChecked(i == index)
+
+    def init_right_preview_panel(self, parent_layout):
+        self.right_panel_frame = QFrame()
+        self.right_panel_frame.setObjectName("RightPreviewPanel")
+        right_layout = QVBoxLayout(self.right_panel_frame)
+        right_layout.setContentsMargins(15, 20, 15, 20)
+        right_layout.setSpacing(10)
+        
+        right_layout.addWidget(QLabel("🖼️ REAL-TIME PREVIEW BAY"))
+        
+        self.preview_window = QLabel()
+        self.preview_window.setObjectName("ImagePreviewBay")
+        self.preview_window.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.preview_window.setFixedSize(240, 360)
+        self.preview_window.setText("[ Waiting for Asset ]")
+        right_layout.addWidget(self.preview_window)
+        
+        right_layout.addWidget(QLabel("SYSTEM TELEMETRY MATRIX"))
+        self.visualizer = ArcaneSystemVisualizer()
+        right_layout.addWidget(self.visualizer)
+        
+        parent_layout.addWidget(self.right_panel_frame, stretch=1)
+
+    def cast_asynchronously(self, target_function, *args):
+        self.visualizer.trigger_pulse()
+        self.worker = ArcaneWorker(target_function, *args)
+        self.worker.manifest_complete.connect(self.display_output)
+        self.worker.start()
+
+    def display_output(self, text):
+        if "C:\\Users\\Public\\" in text and (".png" in text or ".jpg" in text):
+            for word in text.split():
+                if os.path.exists(word) and word.endswith((".png", ".jpg")):
+                    pixmap = QPixmap(word)
+                    self.preview_window.setPixmap(pixmap.scaled(self.preview_window.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+
+    def create_card(self, title, subtext="Quick Actions"):
+        card_frame = QFrame()
+        card_frame.setObjectName("DashboardCard")
+        
+        card_layout = QVBoxLayout(card_frame)
+        card_layout.setContentsMargins(18, 18, 18, 18)
+        card_layout.setSpacing(12)
+        
+        header_layout = QHBoxLayout()
+        title_lbl = QLabel(title)
+        title_style = "font-size: 14px; font-weight: bold; color: #ffffff; font-family: 'Segoe UI';"
+        title_lbl.setStyleSheet(title_style)
+        sub_lbl = QLabel(subtext)
+        sub_style = "font-size: 10px; color: #645585; font-family: 'Segoe UI';"
+        sub_lbl.setStyleSheet(sub_style)
+        header_layout.addWidget(title_lbl)
+        header_layout.addStretch()
+        header_layout.addWidget(sub_lbl)
+        
+        card_layout.addLayout(header_layout)
+        return card_frame, card_layout
+
+    def init_core_tab(self):
+        page = QWidget()
+        main_layout = QVBoxLayout(page)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        
+        card_cfg, layout_cfg = self.create_card("Windows Management", "System Hooks")
+        self.chk_startup = QCheckBox(" Initialize on System Bootup")
+        self.chk_clipboard = QCheckBox(" Clipboard Interception Active")
+        self.chk_clipboard.setChecked(True)
+        layout_cfg.addWidget(self.chk_startup)
+        layout_cfg.addWidget(self.chk_clipboard)
+        
+        btn_pin = QPushButton("Pin Target Frame to Always On Top")
+        btn_pin.clicked.connect(lambda: self.cast_asynchronously(lambda: __import__('incantations').window_anchors.pin_active_window()))
+        layout_cfg.addWidget(btn_pin)
+        main_layout.addWidget(card_cfg)
+        
+        card_act, layout_act = self.create_card("Telemetry Control", "Bare-Metal Diagnostics")
+        btn_telemetry = QPushButton("Query Bare-Metal Performance Metrics")
+        btn_telemetry.clicked.connect(lambda: self.cast_asynchronously(lambda: __import__('incantations').system_monitors.get_system_metrics()))
+        layout_act.addWidget(btn_telemetry)
+        main_layout.addWidget(card_act)
+        
+        self.workspace_stack.addTab(page, "Dashboard")
+
+    def init_alchemy_tab(self):
+        page = QWidget()
+        main_layout = QVBoxLayout(page)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        
+        card_dir, layout_dir = self.create_card("Directory Sorting Vector", "File System")
+        self.txt_path = QLineEdit(r"C:\Users\Public\Downloads")
+        layout_dir.addWidget(self.txt_path)
+        btn_run_sort = QPushButton("Execute File Alchemy Sorting")
+        btn_run_sort.clicked.connect(lambda: self.cast_asynchronously(lambda p: __import__('incantations').file_alchemy.transmute_folder(p), self.txt_path.text()))
+        layout_dir.addWidget(btn_run_sort)
+        main_layout.addWidget(card_dir)
+        
+        self.workspace_stack.addTab(page, "File Alchemy")
+
+    def init_image_tab(self):
+        page = QWidget()
+        main_layout = QVBoxLayout(page)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        
+        card_img, layout_img = self.create_card("Visual Manipulation Chamber", "Image Matrix")
+        self.txt_img_path = QLineEdit(r"C:\Users\Public\Grimoire_Procedural_Logo.png")
+        layout_img.addWidget(self.txt_img_path)
+        
+        btn_bg = QPushButton("Erase Image Background (Transparent PNG)")
+        btn_bg.clicked.connect(lambda: self.cast_asynchronously(lambda p: __import__('incantations').image_matrix.erase_background(p), self.txt_img_path.text()))
+        layout_img.addWidget(btn_bg)
+        main_layout.addWidget(card_img)
+        
+        self.workspace_stack.addTab(page, "Visual Alchemy")
+
+    def init_creative_nexus_tab(self):
+        page = QWidget()
+        main_layout = QVBoxLayout(page)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        row_layout = QHBoxLayout()
+        
+        left_col = QVBoxLayout()
+        card_gif, layout_gif = self.create_card("Giphy & Sticker Suite", "Asset Handoff")
+        self.txt_gif_query = QLineEdit("creepy cute sticker")
+        layout_gif.addWidget(self.txt_gif_query)
+        btn_find_gif = QPushButton("🔍 Search Giphy Streams")
+        btn_find_gif.clicked.connect(lambda: self.cast_asynchronously(lambda q: __import__('incantations').image_matrix.search_giphy(q), self.txt_gif_query.text()))
+        layout_gif.addWidget(btn_find_gif)
+        
+        btn_pack_sticker = QPushButton("🏷️ Format & Copy Sticker to Clipboard")
+        btn_pack_sticker.clicked.connect(lambda: self.cast_asynchronously(lambda p, t: __import__('incantations').image_matrix.format_sticker_package(p, t), self.txt_img_path.text(), "discord"))
+        layout_gif.addWidget(btn_pack_sticker)
+        left_col.addWidget(card_gif)
+        
+        card_sliders, layout_sliders = self.create_card("Pixelation Modulator", "Matrix Transformation")
+        layout_sliders.addWidget(QLabel("Pixel Size Filter Scale:"))
+        self.slider_pixel = QSlider(Qt.Orientation.Horizontal)
+        self.slider_pixel.setRange(2, 32)
+        self.slider_pixel.setValue(8)
+        layout_sliders.addWidget(self.slider_pixel)
+        
+        btn_pixel_art = QPushButton("👾 Transmute Image to Pixel Art")
+        btn_pixel_art.clicked.connect(lambda: self.cast_asynchronously(lambda p, s: __import__('incantations').image_matrix.apply_pixel_art_slider(p, s), self.txt_img_path.text(), self.slider_pixel.value()))
+        layout_sliders.addWidget(btn_pixel_art)
+        left_col.addWidget(card_sliders)
+        row_layout.addLayout(left_col)
+        
+        right_col = QVBoxLayout()
+        card_ai, layout_ai = self
