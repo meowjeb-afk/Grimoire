@@ -442,4 +442,26 @@ class GrimoireMirror(QMainWindow):
         row_layout.addLayout(left_col)
         
         right_col = QVBoxLayout()
-        card_ai, layout_ai = self
+        # FIX applied to the broken unpacking assignment line right here:
+        card_ai, layout_ai = self.create_card("Offline AI & Toy Forge", "Stable Diffusion Interface")
+        layout_ai.addWidget(self.txt_ai_prompt = QLineEdit("gothic cottagecore item plush") if not hasattr(self, 'txt_ai_prompt') else self.txt_ai_prompt)
+        if not hasattr(self, 'txt_ai_prompt'):
+            self.txt_ai_prompt = QLineEdit("gothic cottagecore item plush")
+        layout_ai.addWidget(self.txt_ai_prompt)
+        
+        btn_offline_ai = QPushButton("🎨 Offline AI Render (Port 7860)")
+        btn_offline_ai.clicked.connect(lambda: self.cast_asynchronously(lambda pr: __import__('incantations').asset_summoner.local_offline_ai_forge(pr), self.txt_ai_prompt.text()))
+        layout_ai.addWidget(btn_offline_ai)
+        
+        btn_plush = QPushButton("🧸 Transmute Image into Plush Toy")
+        btn_plush.clicked.connect(lambda: self.cast_asynchronously(lambda p, m: __import__('incantations').image_matrix.transmute_to_plush_or_crochet(p, m), self.txt_img_path.text(), "plush"))
+        layout_ai.addWidget(btn_plush)
+        
+        btn_crochet = QPushButton("🧶 Convert Image into Crochet Pattern Grid")
+        btn_crochet.clicked.connect(lambda: self.cast_asynchronously(lambda p, m: __import__('incantations').image_matrix.transmute_to_plush_or_crochet(p, m), self.txt_img_path.text(), "crochet"))
+        layout_ai.addWidget(btn_crochet)
+        right_col.addWidget(card_ai)
+        
+        row_layout.addLayout(right_col)
+        main_layout.addLayout(row_layout)
+        self.workspace_stack.addTab(page, "Creative Nexus")
