@@ -84,45 +84,4 @@ class GrimoireMirror(QMainWindow):
 
     # --- Frameless Window Dragging Mathematics ---
     def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            event.accept()
-
-    def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.MouseButton.LeftButton:
-            self.move(event.globalPosition().toPoint() - self.drag_position)
-            event.accept()
-
-    def init_custom_title_bar(self, parent_layout):
-        """Constructs a beautifully stylized title bar replacing the default Windows frame layout."""
-        self.title_bar = QFrame()
-        self.title_bar.setObjectName("CustomTitleBar")
-        title_layout = QHBoxLayout(self.title_bar)
-        title_layout.setContentsMargins(15, 6, 12, 6)
-        title_layout.setSpacing(8)
-        
-        # Window Label / Title
-        window_title = QLabel("🔮 Grimoire Master OS Shell Extension")
-        window_title.setStyleSheet("color: #a397bf; font-family: 'Segoe UI'; font-weight: bold; font-size: 11px; letter-spacing: 0.5px;")
-        title_layout.addWidget(window_title)
-        title_layout.addStretch()
-        
-        # Minimize Window Control Action
-        btn_min = QPushButton("🗕")
-        btn_min.setObjectName("TitleMinButton")
-        btn_min.setFixedSize(28, 24)
-        btn_min.clicked.connect(self.showMinimized)
-        title_layout.addWidget(btn_min)
-        
-        # Close Window Control Action
-        btn_close = QPushButton("🗙")
-        btn_close.setObjectName("TitleCloseButton")
-        btn_close.setFixedSize(28, 24)
-        btn_close.clicked.connect(self.close)
-        title_layout.addWidget(btn_close)
-        
-        parent_layout.addWidget(self.title_bar)
-        
-        # Window Label / Title
-        window_title = QLabel("🔮 Grimoire Master OS Shell Extension")
-        window_title.setStyleSheet("color: #a397bf; font-family: '
+        if event.button() ==
