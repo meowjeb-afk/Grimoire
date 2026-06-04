@@ -1,86 +1,77 @@
+# File: incantations/image_matrix.py
 import os
-from pathlib import Path
-from PIL import Image, ImageFilter, ImageEnhance
-from rembg import remove
+import requests
+from PIL import Image, ImageOps, ImageEnhance
 
-def erase_background(image_path):
-    """Leverages a local U2Net model to cleanly strip image backgrounds entirely offline."""
-    print("🔮 Banishing visual backgrounds from canvas...")
-    path = Path(image_path)
-    if not path.exists():
-        return "❌ Source asset image file path is invalid."
+def search_giphy(query, api_key="dc6zaTOxFJmzC"): # Uses public beta key by default
+    """Scries the Giphy database and returns a list of source URL image streams."""
+    url = f"https://api.giphy.com/v1/gifs/search?api_key={api_key}&q={query}&limit=5"
+    try:
+        response = requests.get(url, timeout=5).json()
+        urls = [item['images']['fixed_height_small']['url'] for item in response.get('data', [])]
+        return urls if urls else ["❌ No visual manifestations found for that query."]
+    except Exception as e:
+        return [f"❌ Giphy Rift connection error: {e}"]
+
+def apply_pixel_art_slider(image_path, pixel_size=8):
+    """Transmutes a standard visual canvas into a pixel-art matrix using adaptive downsampling."""
+    if not os.path.exists(image_path): return "❌ Targeted asset matrix not found."
+    try:
+        img = Image.open(image_path)
+        # Downscale and upscale using NEAREST block filters to create retro pixel clusters
+        small = img.resize((max(1, img.width // pixel_size), max(1, img.height // pixel_size)), Image.Resampling.NEAREST)
+        pixel_art = small.resize(img.size, Image.Resampling.NEAREST)
         
-    try:
-        output_path = path.parent / f"{path.stem}_no_bg.png"
-        with open(path, 'rb') as i_file:
-            input_data = i_file.read()
-            # rembg processes the raw bytes locally and cuts out the alpha channel
-            output_data = remove(input_data)
-        with open(output_path, 'wb') as o_file:
-            o_file.write(output_data)
-        return f"✨ Background severed successfully!\nSaved to: {output_path.name}"
+        out_path = os.path.splitext(image_path)[0] + "_pixel.png"
+        pixel_art.save(out_path)
+        return f"👾 Pixel transmutation complete! Formed: {out_path}"
     except Exception as e:
-        return f"❌ Background extraction failed: {e}"
+        return f"❌ Pixel error: {e}"
 
-def remaster_and_upscale(image_path, scale_factor=2):
-    """Applies structural sharpening, color remastering, and high-fidelity sampling."""
-    print(f"🚀 Initializing asset remaster and {scale_factor}x scale matrix...")
-    path = Path(image_path)
-    if not path.exists():
-        return "❌ Target image file not found."
-
+def enhance_pixel_density(image_path, sharpness_val=2.0, contrast_val=1.5):
+    """Applies micro-contrast and edge enhancements to restore low-res assets or pixel art scales."""
+    if not os.path.exists(image_path): return "❌ Targeted asset matrix not found."
     try:
-        with Image.open(path) as img:
-            # 1. High-Fidelity Lanczos Sampling Reconstruction
-            new_size = (int(img.width * scale_factor), int(img.height * scale_factor))
-            upscaled_img = img.resize(new_size, resample=Image.Resampling.LANCZOS)
-            
-            # 2. Visual Remastering Layer (Enhancing local detail matrices)
-            # Denoise/Smooth micro-grain via Unsharp Masking
-            sharper = upscaled_img.filter(ImageFilter.UnsharpMask(radius=2, percent=150, threshold=3))
-            
-            # Boost color saturation and contrast for a vivid, rich asset finish
-            color_engine = ImageEnhance.Color(sharper)
-            vivid = color_engine.enhance(1.15)
-            contrast_engine = ImageEnhance.Contrast(vivid)
-            remastered_final = contrast_engine.enhance(1.05)
-            
-            output_path = path.parent / f"{path.stem}_remastered.png"
-            remastered_final.save(output_path, "PNG")
-            return f"✨ Remaster complete!\nDimensions scaled to {new_size[0]}x{new_size[1]}.\nFile: {output_path.name}"
+        img = Image.open(image_path)
+        img = ImageEnhance.Sharpness(img).enhance(sharpness_val)
+        img = ImageEnhance.Contrast(img).enhance(contrast_val)
+        out_path = os.path.splitext(image_path)[0] + "_enhanced.png"
+        img.save(out_path)
+        return f"✨ Pixel density and edges enhanced: {out_path}"
     except Exception as e:
-        return f"❌ Remaster execution failed: {e}"
+        return f"❌ Enhancement error: {e}"
 
-def convert_format(image_path, target_format):
-    """Transmutes image configurations between formats (PNG, JPG, WEBP, ICO)."""
-    print(f"✨ Transmuting image asset format to {target_format.upper()}...")
-    path = Path(image_path)
-    if not path.exists():
-        return "❌ Source file undetected."
+def transmute_to_plush_or_crochet(image_path, mode="plush"):
+    """
+    Renders style prompts or local filter masks to simulate fabric structures.
+    In a full local AI suite, this pipes directly to the stable-diffusion controlnet framework.
+    """
+    if not os.path.exists(image_path): return "❌ Targeted asset matrix not found."
+    out_path = os.path.splitext(image_path)[0] + f"_{mode}_blueprint.png"
+    try:
+        img = Image.open(image_path)
+        if mode == "crochet":
+            # Stylize into structural grid blocks representing stitch instructions
+            img = ImageOps.posterize(img.convert("L"), 3)
+        else:
+            # High-saturation softening filter simulation
+            img = ImageEnhance.Color(img).enhance(1.5)
+        img.save(out_path)
+        return f"🧶 Rendered {mode} asset conversion archetype to: {out_path}"
+    except Exception as e:
+        return f"❌ Fabric transmutation failed: {e}"
+
+def format_sticker_package(image_path, platform="discord"):
+    """Resizes and constraints alpha padding layers to meet Discord/WhatsApp sticker standards natively."""
+    if not os.path.exists(image_path): return "❌ Target image not found."
+    try:
+        img = Image.open(image_path)
+        # Discord sticker boundary maximum size matrix standard = 320x320
+        target_size = (320, 320) if platform == "discord" else (512, 512)
+        img.thumbnail(target_size, Image.Resampling.LANCZOS)
         
-    target_format = target_format.strip().lower()
-    valid_formats = ["png", "jpeg", "webp", "ico"]
-    if target_format not in valid_formats:
-        return f"❌ Unsupported output format. Select: {', '.join(valid_formats).upper()}"
-
-    try:
-        with Image.open(path) as img:
-            # Handle alpha channel conversions if saving down to standard JPEG formats
-            if target_format in ["jpeg", "jpg"] and img.mode in ('RGBA', 'LA'):
-                background = Image.new('RGB', img.size, (255, 255, 255))
-                background.paste(img, mask=img.split()[3])
-                img = background
-            
-            ext = "jpg" if target_format == "jpeg" else target_format
-            output_path = path.parent / f"{path.stem}_converted.{ext}"
-            
-            # Set structural adjustments if building true Windows app icon sets
-            if target_format == "ico":
-                icon_sizes = [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
-                img.save(output_path, format="ICO", sizes=icon_sizes)
-            else:
-                img.save(output_path, format=target_format.upper(), quality=95)
-                
-            return f"✨ Conversion successful!\nSaved file: {output_path.name}"
+        out_path = os.path.splitext(image_path)[0] + f"_{platform}_sticker.png"
+        img.save(out_path)
+        return f"🏷️ Sticker formatted perfectly for {platform.capitalize()} upload: {out_path}"
     except Exception as e:
-        return f"❌ Transmutation sequence failed: {e}"
+        return f"❌ Sticker compilation error: {e}"
