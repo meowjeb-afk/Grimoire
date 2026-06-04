@@ -1,5 +1,6 @@
 import sys
 import json
+from incantations import ecosystem_summoner
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QCheckBox, QTabWidget, QLineEdit, QTextEdit
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from incantations import file_alchemy, asset_summoner, workspace_stasis, updater_scryer, purge_debloat, arcane_intel, scry_search, void_shield
