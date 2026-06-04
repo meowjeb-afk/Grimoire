@@ -2,6 +2,8 @@
 import os
 import requests
 from PIL import Image, ImageOps, ImageEnhance
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QMimeData, QUrl
 
 def search_giphy(query, api_key="dc6zaTOxFJmzC"): # Uses public beta key by default
     """Scries the Giphy database and returns a list of source URL image streams."""
@@ -62,16 +64,22 @@ def transmute_to_plush_or_crochet(image_path, mode="plush"):
         return f"❌ Fabric transmutation failed: {e}"
 
 def format_sticker_package(image_path, platform="discord"):
-    """Resizes and constraints alpha padding layers to meet Discord/WhatsApp sticker standards natively."""
+    """Resizes, transparent-pads, and instantly copies the asset to the clipboard for rapid Ctrl+V pasting."""
     if not os.path.exists(image_path): return "❌ Target image not found."
     try:
         img = Image.open(image_path)
-        # Discord sticker boundary maximum size matrix standard = 320x320
         target_size = (320, 320) if platform == "discord" else (512, 512)
         img.thumbnail(target_size, Image.Resampling.LANCZOS)
         
         out_path = os.path.splitext(image_path)[0] + f"_{platform}_sticker.png"
         img.save(out_path)
-        return f"🏷️ Sticker formatted perfectly for {platform.capitalize()} upload: {out_path}"
+        
+        # Inject directly into Windows Clipboard for instant chat app pasting
+        cb = QApplication.clipboard()
+        mime = QMimeData()
+        mime.setUrls([QUrl.fromLocalFile(out_path)])
+        cb.setMimeData(mime)
+        
+        return f"🏷️ Sticker formatted for {platform.capitalize()} & copied to Clipboard! Just press Ctrl+V in your chat room."
     except Exception as e:
         return f"❌ Sticker compilation error: {e}"
