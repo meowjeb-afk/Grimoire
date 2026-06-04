@@ -1,5 +1,8 @@
 {
   "run_on_startup": false,
   "active_theme": "Gothic Dark",
-  "clipboard_automation": true
+  "clipboard_automation": true,
+  "text_expansion": true,
+  "wallpaper_cycle_minutes": 60,
+  "saved_workspace_windows": []
 }
