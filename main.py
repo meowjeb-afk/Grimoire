@@ -1,17 +1,17 @@
 import sys
 import threading
 import os
+import json
 from PIL import Image, ImageDraw
 import pystray
 from PyQt6.QtWidgets import QApplication
 from ui_dashboard import GrimoireMirror
-from incantations import clipboard_magic
+from incantations import clipboard_magic, text_expansion
 
 def create_tray_rune():
-    """Generates a custom stylized box graphic dynamically for the Windows Tray icon."""
     image = Image.new('RGB', (64, 64), color=(17, 17, 22))
     draw = ImageDraw.Draw(image)
-    draw.rectangle([18, 18, 46, 46], fill=(0, 255, 200)) # Glowing cyan core
+    draw.rectangle([18, 18, 46, 46], fill=(0, 255, 200))
     return image
 
 def exit_gracefully(icon, item):
@@ -19,21 +19,30 @@ def exit_gracefully(icon, item):
     os._exit(0)
 
 def launch_hub():
-    # 1. Initialize the GUI application layer
     app = QApplication(sys.argv)
     mirror = GrimoireMirror()
     
-    # 2. Boot up the background keyboard automation listener thread
-    threading.Thread(target=clipboard_magic.summon_keyboard_listener, daemon=True).start()
+    # Check configurations to selectively boot modules
+    try:
+        with open("database/runes.json", "r") as f:
+            runes = json.load(f)
+    except Exception:
+        runes = {"clipboard_automation": True, "text_expansion": True}
+
+    # Thread Module 1: Clipboard Interceptor
+    if runes.get("clipboard_automation", True):
+        threading.Thread(target=clipboard_magic.summon_keyboard_listener, daemon=True).start()
     
-    # 3. Form the Windows System Tray menu mapping
+    # Thread Module 2: Text Expansion Listener
+    if runes.get("text_expansion", True):
+        threading.Thread(target=text_expansion.register_expansions, daemon=True).start()
+    
+    # System Tray Hook Configuration
     menu = pystray.Menu(
-        pystray.MenuItem('Open Dashboard', lambda: mirror.show()),
-        pystray.MenuItem('Banish (Quit)', exit_gracefully)
+        pystray.MenuItem('Open Grimoire Mirror', lambda: mirror.show()),
+        pystray.MenuItem('Banish System (Quit)', exit_gracefully)
     )
     icon = pystray.Icon("Grimoire", create_tray_rune(), title="Grimoire Shell Extension", menu=menu)
-    
-    # Run Tray icon in its own thread so it does not block the main window loop
     threading.Thread(target=icon.run, daemon=True).start()
     
     mirror.show()
