@@ -103,4 +103,26 @@ class GrimoireMirror(QMainWindow):
         
         # Window Label / Title
         window_title = QLabel("🔮 Grimoire Master OS Shell Extension")
+        window_title.setStyleSheet("color: #a397bf; font-family: 'Segoe UI'; font-weight: bold; font-size: 11px; letter-spacing: 0.5px;")
+        title_layout.addWidget(window_title)
+        title_layout.addStretch()
+        
+        # Minimize Window Control Action
+        btn_min = QPushButton("🗕")
+        btn_min.setObjectName("TitleMinButton")
+        btn_min.setFixedSize(28, 24)
+        btn_min.clicked.connect(self.showMinimized)
+        title_layout.addWidget(btn_min)
+        
+        # Close Window Control Action
+        btn_close = QPushButton("🗙")
+        btn_close.setObjectName("TitleCloseButton")
+        btn_close.setFixedSize(28, 24)
+        btn_close.clicked.connect(self.close)
+        title_layout.addWidget(btn_close)
+        
+        parent_layout.addWidget(self.title_bar)
+        
+        # Window Label / Title
+        window_title = QLabel("🔮 Grimoire Master OS Shell Extension")
         window_title.setStyleSheet("color: #a397bf; font-family: '
