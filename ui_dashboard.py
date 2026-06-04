@@ -7,8 +7,8 @@ from PyQt6.QtWidgets import (
     QPushButton, QLabel, QCheckBox, QTabWidget, 
     QLineEdit, QTextEdit, QComboBox, QFrame, QSlider
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint, QTimer, QSize
-from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QBrush, QConicalGradient, QPainterPath, QFont
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint, QTimer
+from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QBrush, QConicalGradient, QPainterPath
 
 class ArcaneWorker(QThread):
     manifest_complete = pyqtSignal(str)
@@ -33,7 +33,6 @@ class GrimoireVectorLogo(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
-        # Define the vibrant custom brand colors
         teal_glow = QColor("#61ffcf")
         
         # 1. Draw the magical sweeping arc over the book
@@ -43,7 +42,6 @@ class GrimoireVectorLogo(QWidget):
         
         # 2. Draw the Stylized Line-Art Book Spine & Cover
         book_path = QPainterPath()
-        # Front Cover & Pages Profile
         book_path.moveTo(10, 28)
         book_path.lineTo(10, 14)
         book_path.quadTo(12, 11, 16, 12)
@@ -51,13 +49,11 @@ class GrimoireVectorLogo(QWidget):
         book_path.lineTo(26, 22)
         book_path.quadTo(16, 25, 10, 28)
         
-        # Spine & Base Base
         book_path.moveTo(10, 14)
         book_path.quadTo(16, 16, 26, 12)
         book_path.moveTo(10, 28)
         book_path.lineTo(26, 22)
         
-        # Accent ribbon/bookmark leaf peeking down
         book_path.moveTo(16, 23)
         book_path.lineTo(16, 29)
         book_path.lineTo(13, 27)
@@ -215,23 +211,19 @@ class GrimoireMirror(QMainWindow):
         parent_layout.addWidget(self.title_bar)
 
     def init_sidebar(self, parent_layout):
-        """Constructs the sidebar navigation panel using the direct code-generated logo framework."""
         self.sidebar_frame = QFrame()
         self.sidebar_frame.setObjectName("SidebarDock")
         sidebar_layout = QVBoxLayout(self.sidebar_frame)
         sidebar_layout.setContentsMargins(16, 24, 16, 24)
         sidebar_layout.setSpacing(8)
         
-        # Master Branding Layout Container
         brand_box = QHBoxLayout()
         brand_box.setContentsMargins(4, 0, 4, 24)
         brand_box.setSpacing(12)
         
-        # Inject Vector Logo Instance directly
         vector_logo = GrimoireVectorLogo()
         brand_box.addWidget(vector_logo, alignment=Qt.AlignmentFlag.AlignVCenter)
         
-        # Construct Two-Tier Text Stack Layout
         text_stack = QVBoxLayout()
         text_stack.setSpacing(1)
         text_stack.setContentsMargins(0, 0, 0, 0)
@@ -243,7 +235,6 @@ class GrimoireMirror(QMainWindow):
             color: #c299ff; 
             font-family: 'Segoe UI', -apple-system; 
             letter-spacing: -0.2px;
-            line-height: 100%;
         """)
         
         subtitle_text = QLabel("Master OS")
@@ -442,11 +433,9 @@ class GrimoireMirror(QMainWindow):
         row_layout.addLayout(left_col)
         
         right_col = QVBoxLayout()
-        # FIX applied to the broken unpacking assignment line right here:
         card_ai, layout_ai = self.create_card("Offline AI & Toy Forge", "Stable Diffusion Interface")
-        layout_ai.addWidget(self.txt_ai_prompt = QLineEdit("gothic cottagecore item plush") if not hasattr(self, 'txt_ai_prompt') else self.txt_ai_prompt)
-        if not hasattr(self, 'txt_ai_prompt'):
-            self.txt_ai_prompt = QLineEdit("gothic cottagecore item plush")
+        
+        self.txt_ai_prompt = QLineEdit("gothic cottagecore item plush")
         layout_ai.addWidget(self.txt_ai_prompt)
         
         btn_offline_ai = QPushButton("🎨 Offline AI Render (Port 7860)")
@@ -465,3 +454,199 @@ class GrimoireMirror(QMainWindow):
         row_layout.addLayout(right_col)
         main_layout.addLayout(row_layout)
         self.workspace_stack.addTab(page, "Creative Nexus")
+
+    def init_deployment_architect_tab(self):
+        page = QWidget()
+        main_layout = QVBoxLayout(page)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        
+        card_rep, layout_rep = self.create_card("OS Deployment Replicator", "Backup & Install")
+        btn_restore = QPushButton("🛡️ Generate Safe System Restore Checkpoint")
+        btn_restore.clicked.connect(lambda: self.cast_asynchronously(lambda: __import__('incantations').deep_cleaner.drop_system_restore_anchor()))
+        layout_rep.addWidget(btn_restore)
+        
+        btn_export_apps = QPushButton("📋 Export System Software Configuration List")
+        btn_export_apps.clicked.connect(lambda: self.cast_asynchronously(lambda: __import__('incantations').deep_cleaner.export_installed_software_replica()))
+        layout_rep.addWidget(btn_export_apps)
+        
+        self.txt_todo_replica = QTextEdit("[ ] REINSTALL: GoogleChrome\n[ ] REINSTALL: VLC\n[ ] REINSTALL: Steam")
+        layout_rep.addWidget(self.txt_todo_replica)
+        
+        btn_run_bulk = QPushButton("🚀 Run Automated Silent Bulk Installer Loop")
+        btn_run_bulk.clicked.connect(lambda: self.cast_asynchronously(lambda t: __import__('incantations').deep_cleaner.execute_silent_bulk_installer_exe(t), self.txt_todo_replica.toPlainText()))
+        layout_rep.addWidget(btn_run_bulk)
+        
+        main_layout.addWidget(card_rep)
+        self.workspace_stack.addTab(page, "Deployment")
+
+    def init_tuning_tab(self):
+        page = QWidget()
+        main_layout = QVBoxLayout(page)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        
+        card_guard, layout_guard = self.create_card("System Policy Shields", "Registry Security")
+        btn_policies = QPushButton("🔒 Inject Registry Policy Guards Against Auto-Bloatware")
+        btn_policies.clicked.connect(lambda: self.cast_asynchronously(lambda: __import__('incantations').persistent_bans.freeze_windows_bloatware_policies()))
+        layout_guard.addWidget(btn_policies)
+        main_layout.addWidget(card_guard)
+        
+        self.workspace_stack.addTab(page, "Arcane Tuning")
+
+    def apply_theme(self):
+        self.setStyleSheet("""
+            QWidget#MainContainer {
+                background-color: #0b0813;
+                border: 1px solid #1f1833;
+                border-radius: 12px;
+            }
+            
+            QFrame#CustomTitleBar {
+                background-color: #0b0813;
+                border-top-left-radius: 12px;
+                border-top-right-radius: 12px;
+                border-bottom: 1px solid #140f24;
+            }
+            QPushButton#TitleMinButton, QPushButton#TitleCloseButton {
+                background: transparent;
+                color: #5c4e7a;
+                border: none;
+                font-size: 11px;
+                font-weight: bold;
+            }
+            QPushButton#TitleMinButton:hover {
+                color: #7b61ff;
+                background-color: #171226;
+                border-radius: 4px;
+            }
+            QPushButton#TitleCloseButton:hover {
+                color: #ffffff;
+                background-color: #ff4d4d;
+                border-radius: 4px;
+            }
+            
+            QFrame#SidebarDock {
+                background-color: #120e1f;
+                border-right: 1px solid #1f1833;
+                border-bottom-left-radius: 11px;
+            }
+            QFrame#SidebarDock QPushButton {
+                background-color: transparent;
+                color: #8c7fa6;
+                border: none;
+                border-radius: 8px;
+                padding: 10px 15px;
+                font-family: 'Segoe UI';
+                font-weight: bold;
+                font-size: 11px;
+                text-align: left;
+            }
+            QFrame#SidebarDock QPushButton:hover {
+                background-color: #1a142e;
+                color: #ffffff;
+            }
+            QFrame#SidebarDock QPushButton:checked {
+                background-color: #241b3f;
+                color: #7b61ff;
+                border-left: 3px solid #7b61ff;
+            }
+            
+            QTabWidget::panel { 
+                background-color: #0b0813; 
+                border: none; 
+            }
+            
+            QFrame#DashboardCard { 
+                background-color: #171226; 
+                border: 1px solid #251d3a; 
+                border-radius: 16px; 
+            }
+            
+            QFrame#RightPreviewPanel {
+                background-color: #120e1f;
+                border-left: 1px solid #1f1833;
+                border-bottom-right-radius: 11px;
+            }
+            
+            QLabel { 
+                color: #a397bf; 
+                font-family: 'Segoe UI'; 
+                font-size: 11px; 
+                font-weight: bold;
+            }
+            QCheckBox { 
+                color: #c9bedf; 
+                font-family: 'Segoe UI'; 
+                font-size: 11px; 
+            }
+            QComboBox { 
+                background-color: #1e1730; 
+                color: white; 
+                border: 1px solid #2d2349; 
+                border-radius: 6px; 
+                padding: 5px; 
+                font-size: 11px; 
+            }
+            QLineEdit { 
+                background-color: #1e1730; 
+                color: #61ffcf; 
+                border: 1px solid #2d2349; 
+                border-radius: 6px; 
+                padding: 6px; 
+                font-family: 'Consolas'; 
+                font-size: 11px; 
+            }
+            QTextEdit { 
+                background-color: #08060f; 
+                color: #61ffcf; 
+                border: 1px solid #1e1730; 
+                font-family: 'Consolas'; 
+                font-size: 11px; 
+                border-radius: 10px; 
+                padding: 8px; 
+            }
+            
+            QSlider::groove:horizontal { 
+                border: 1px solid #2d2349; 
+                height: 6px; 
+                background: #1e1730; 
+                border-radius: 3px; 
+            }
+            QSlider::handle:horizontal { 
+                background: #7b61ff; 
+                width: 14px; 
+                margin: -4px 0; 
+                border-radius: 7px; 
+            }
+            
+            QPushButton { 
+                background-color: #211936; 
+                color: #7b61ff; 
+                font-weight: bold; 
+                border: 1px solid #322652; 
+                border-radius: 8px; 
+                padding: 8px; 
+                font-family: 'Segoe UI'; 
+                font-size: 11px; 
+            }
+            QPushButton:hover { 
+                background-color: #7b61ff; 
+                color: #ffffff; 
+                border-color: #7b61ff;
+            }
+            
+            QLabel#ImagePreviewBay {
+                background-color: #08060f; 
+                border: 2px dashed #251d3a; 
+                border-radius: 14px; 
+                color: #52476d;
+                font-family: 'Segoe UI';
+                font-size: 11px;
+            }
+        """)
+
+if __name__ == "__main__":
+    from PyQt6.QtWidgets import QApplication
+    app = QApplication(sys.argv)
+    window = GrimoireMirror()
+    window.show()
+    sys.exit(app.exec())
