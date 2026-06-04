@@ -35,8 +35,8 @@ class GrimoireVectorLogo(QWidget):
         
         teal_glow = QColor("#61ffcf")
         
-        # 1. Draw the magical sweeping arc over the book
-        arc_pen = QPen(teal_glow, 1.75, Qt.PenStyle.SolidLine, Qt.PenCapStyle.Round)
+        # 1. Draw the magical sweeping arc over the book (FIXED: RoundCap)
+        arc_pen = QPen(teal_glow, 1.75, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap)
         painter.setPen(arc_pen)
         painter.drawArc(4, 4, 28, 28, 45 * 16, 190 * 16)
         
