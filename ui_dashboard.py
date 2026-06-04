@@ -1,7 +1,4 @@
-# Let's create the final, bulletproof, syntax-verified ui_dashboard.py file script text
-# directly from Python to ensure absolutely ZERO truncation, cutoffs, or string issues occur.
-
-code_content = """# File: ui_dashboard.py
+# File: ui_dashboard.py
 import sys
 import os
 import math
@@ -27,7 +24,7 @@ class ArcaneWorker(QThread):
             self.manifest_complete.emit(f"Sequence Error: {e}")
 
 class ArcaneSystemVisualizer(QWidget):
-    \"\"\"Custom vector-drawn visualizer replacing the plain text logger with a dynamic matrix canvas.\"\"\"
+    """Custom vector-drawn visualizer replacing the plain text logger with a dynamic matrix canvas."""
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumHeight(150)
@@ -102,11 +99,14 @@ class GrimoireMirror(QMainWindow):
         self.setWindowTitle("Grimoire Master OS Shell Extension")
         self.setFixedSize(1040, 780)
         
+        # Strip native OS title bar frame
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
+        # Variables to track mouse movement for window dragging
         self.drag_position = QPoint()
 
+        # Main Window Base Layout
         self.main_container = QWidget()
         self.main_container.setObjectName("MainContainer")
         self.setCentralWidget(self.main_container)
@@ -115,21 +115,27 @@ class GrimoireMirror(QMainWindow):
         master_vertical.setContentsMargins(0, 0, 0, 0)
         master_vertical.setSpacing(0)
         
+        # 1. Inject Custom Immersive Title Bar Component
         self.init_custom_title_bar(master_vertical)
         
+        # 2. Main Content Split Panel (Sidebar + Workspaces + Preview)
         content_layout = QHBoxLayout()
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
         master_vertical.addLayout(content_layout)
         
+        # Initialize Left Navigation Sidebar
         self.init_sidebar(content_layout)
         
+        # Main Workspace Page Stack
         self.workspace_stack = QTabWidget()
-        self.workspace_stack.tabBar().hide()
+        self.workspace_stack.tabBar().hide() # Hide default tab bar headers
         content_layout.addWidget(self.workspace_stack, stretch=3)
         
+        # Initialize Right Side Real-time Image Preview Dock
         self.init_right_preview_panel(content_layout)
         
+        # Initialize Individual Module Views
         self.init_core_tab()
         self.init_alchemy_tab()
         self.init_image_tab()
@@ -139,6 +145,7 @@ class GrimoireMirror(QMainWindow):
         
         self.apply_theme()
 
+    # --- Frameless Window Dragging Mathematics ---
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
@@ -150,24 +157,28 @@ class GrimoireMirror(QMainWindow):
             event.accept()
 
     def init_custom_title_bar(self, parent_layout):
+        """Constructs a beautifully stylized title bar replacing the default Windows frame layout."""
         self.title_bar = QFrame()
         self.title_bar.setObjectName("CustomTitleBar")
         title_layout = QHBoxLayout(self.title_bar)
         title_layout.setContentsMargins(15, 6, 12, 6)
         title_layout.setSpacing(8)
         
+        # Window Label / Title
         window_title = QLabel("🔮 Grimoire Master OS Shell Extension")
         title_style = "color: #a397bf; font-family: 'Segoe UI'; font-weight: bold; font-size: 11px; letter-spacing: 0.5px;"
         window_title.setStyleSheet(title_style)
         title_layout.addWidget(window_title)
         title_layout.addStretch()
         
+        # Minimize Window Control Action
         btn_min = QPushButton("🗕")
         btn_min.setObjectName("TitleMinButton")
         btn_min.setFixedSize(28, 24)
         btn_min.clicked.connect(self.showMinimized)
         title_layout.addWidget(btn_min)
         
+        # Close Window Control Action
         btn_close = QPushButton("🗙")
         btn_close.setObjectName("TitleCloseButton")
         btn_close.setFixedSize(28, 24)
@@ -177,6 +188,7 @@ class GrimoireMirror(QMainWindow):
         parent_layout.addWidget(self.title_bar)
 
     def init_sidebar(self, parent_layout):
+        """Builds the left vertical navigation deck."""
         self.sidebar_frame = QFrame()
         self.sidebar_frame.setObjectName("SidebarDock")
         sidebar_layout = QVBoxLayout(self.sidebar_frame)
@@ -223,6 +235,7 @@ class GrimoireMirror(QMainWindow):
             btn.setChecked(i == index)
 
     def init_right_preview_panel(self, parent_layout):
+        """Creates the right-hand live image display hub with integrated vector visualization."""
         self.right_panel_frame = QFrame()
         self.right_panel_frame.setObjectName("RightPreviewPanel")
         right_layout = QVBoxLayout(self.right_panel_frame)
@@ -238,6 +251,7 @@ class GrimoireMirror(QMainWindow):
         self.preview_window.setText("[ Waiting for Asset ]")
         right_layout.addWidget(self.preview_window)
         
+        # System Telemetry Vector Canvas
         right_layout.addWidget(QLabel("SYSTEM TELEMETRY MATRIX"))
         self.visualizer = ArcaneSystemVisualizer()
         right_layout.addWidget(self.visualizer)
@@ -251,13 +265,14 @@ class GrimoireMirror(QMainWindow):
         self.worker.start()
 
     def display_output(self, text):
-        if "C:\\Users\\Public\\" in text and (".png" in text or ".jpg" in text):
+        if "C:\\Public\\" in text and (".png" in text or ".jpg" in text):
             for word in text.split():
                 if os.path.exists(word) and word.endswith((".png", ".jpg")):
                     pixmap = QPixmap(word)
                     self.preview_window.setPixmap(pixmap.scaled(self.preview_window.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
     def create_card(self, title, subtext="Quick Actions"):
+        """Generates the soft rounded neon-obsidian layout boxes."""
         card_frame = QFrame()
         card_frame.setObjectName("DashboardCard")
         
@@ -403,7 +418,7 @@ class GrimoireMirror(QMainWindow):
         btn_export_apps.clicked.connect(lambda: self.cast_asynchronously(lambda: __import__('incantations').deep_cleaner.export_installed_software_replica()))
         layout_rep.addWidget(btn_export_apps)
         
-        self.txt_todo_replica = QTextEdit("[ ] REINSTALL: GoogleChrome\\n[ ] REINSTALL: VLC\\n[ ] REINSTALL: Steam")
+        self.txt_todo_replica = QTextEdit("[ ] REINSTALL: GoogleChrome\n[ ] REINSTALL: VLC\n[ ] REINSTALL: Steam")
         layout_rep.addWidget(self.txt_todo_replica)
         
         btn_run_bulk = QPushButton("🚀 Run Automated Silent Bulk Installer Loop")
@@ -427,13 +442,15 @@ class GrimoireMirror(QMainWindow):
         self.workspace_stack.addTab(page, "Arcane Tuning")
 
     def apply_theme(self):
-        self.setStyleSheet(\"\"\"
+        """Implements the deep gothic palette."""
+        self.setStyleSheet("""
             QWidget#MainContainer {
                 background-color: #0b0813;
                 border: 1px solid #1f1833;
                 border-radius: 12px;
             }
             
+            /* Frameless Custom Title Bar Layout Styling */
             QFrame#CustomTitleBar {
                 background-color: #0b0813;
                 border-top-left-radius: 12px;
@@ -458,6 +475,7 @@ class GrimoireMirror(QMainWindow):
                 border-radius: 4px;
             }
             
+            /* Left Sidebar Container Dock Layout */
             QFrame#SidebarDock {
                 background-color: #120e1f;
                 border-right: 1px solid #1f1833;
@@ -484,17 +502,20 @@ class GrimoireMirror(QMainWindow):
                 border-left: 3px solid #7b61ff;
             }
             
+            /* Main Workspace Area Panels */
             QTabWidget::panel { 
                 background-color: #0b0813; 
                 border: none; 
             }
             
+            /* Inner Card Component Containers */
             QFrame#DashboardCard { 
                 background-color: #171226; 
                 border: 1px solid #251d3a; 
                 border-radius: 16px; 
             }
             
+            /* Right Control Monitor Panel */
             QFrame#RightPreviewPanel {
                 background-color: #120e1f;
                 border-left: 1px solid #1f1833;
@@ -539,6 +560,7 @@ class GrimoireMirror(QMainWindow):
                 padding: 8px; 
             }
             
+            /* Slider Interface Tracks */
             QSlider::groove:horizontal { 
                 border: 1px solid #2d2349; 
                 height: 6px; 
@@ -552,6 +574,7 @@ class GrimoireMirror(QMainWindow):
                 border-radius: 7px; 
             }
             
+            /* Dashboard Interactive Action Buttons */
             QPushButton { 
                 background-color: #211936; 
                 color: #7b61ff; 
@@ -568,6 +591,7 @@ class GrimoireMirror(QMainWindow):
                 border-color: #7b61ff;
             }
             
+            /* Live Image Asset Preview Box Container */
             QLabel#ImagePreviewBay {
                 background-color: #08060f; 
                 border: 2px dashed #251d3a; 
@@ -576,7 +600,7 @@ class GrimoireMirror(QMainWindow):
                 font-family: 'Segoe UI';
                 font-size: 11px;
             }
-        \"\"\")
+        """)
 
 if __name__ == "__main__":
     from PyQt6.QtWidgets import QApplication
@@ -584,6 +608,3 @@ if __name__ == "__main__":
     window = GrimoireMirror()
     window.show()
     sys.exit(app.exec())
-\"\"\"
-
-print("SUCCESS: Code layout verification step passed cleanly inside background environment.")
