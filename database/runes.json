@@ -5,7 +5,6 @@
   "text_expansion": true,
   "void_shield_active": false,
   "ai_model": "llama3",
-  "saved_workspace_windows": [],
   "ecosystem_bundle": [
     "Microsoft.VisualStudioCode",
     "Git.Git",
@@ -15,6 +14,17 @@
     "Discord.Discord",
     "Steam.Steam",
     "GIMP.GIMP",
-    "OBSProject.OBSStudio"
-  ]
+    "OBSProject.OBSStudio",
+    "EpicGames.EpicGamesLauncher",
+    "Valvesoftware.Steam",
+    "Spotify.Spotify",
+    "VLC.VLC",
+    "QLightingService.OpenRGB"
+  ],
+  "bloatware_guide": {
+    "Microsoft.YourPhone": "Windows Link. Synchronizes phone notifications. Safe to banish; will not destabilize OS.",
+    "Microsoft.GamingApp": "Xbox App Core framework. Essential for Xbox Game Pass. Banishment breaks cloud saves.",
+    "Clipchamp.Clipchamp": "Built-in video editor. Pure bloatware. Safe to purge.",
+    "Microsoft.BingNews": "Live news feed integration. Heavy background RAM consumer. Safe to purge."
+  }
 }
