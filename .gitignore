@@ -1,0 +1,11 @@
+# Ignore python cache
+__pycache__/
+*.pyc
+
+# Ignore local configuration state (users will generate their own)
+database/runes.json
+
+# Ignore compiled app distributions
+build/
+dist/
+*.spec
