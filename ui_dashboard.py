@@ -7,8 +7,8 @@ from PyQt6.QtWidgets import (
     QPushButton, QLabel, QCheckBox, QTabWidget, 
     QLineEdit, QTextEdit, QComboBox, QFrame, QSlider
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint, QTimer
-from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QBrush, QConicalGradient, QPainterPath
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint, QTimer, QSize
+from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QBrush, QConicalGradient
 
 class ArcaneWorker(QThread):
     manifest_complete = pyqtSignal(str)
@@ -23,42 +23,98 @@ class ArcaneWorker(QThread):
         except Exception as e:
             self.manifest_complete.emit(f"Sequence Error: {e}")
 
-class GrimoireVectorLogo(QWidget):
-    """Custom vector-drawn branding icon replicating the exact line-art book and crescent sweep style."""
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setFixedSize(36, 36)
+class GrimoireNavButton(QFrame):
+    """Custom navigation button that displays only an icon by default, revealing text on hover or selection."""
+    clicked = pyqtSignal(int)
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    def __init__(self, icon_str, name_str, index, parent=None):
+        super().__init__(parent)
+        self.index = index
+        self.is_checked = False
+        self.setObjectName("NavButtonContainer")
         
-        teal_glow = QColor("#61ffcf")
+        # Enable tracking for mouse hover movements
+        self.setAttribute(Qt.WidgetAttribute.WA_Hover, True)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         
-        # 1. Draw the magical sweeping arc over the book (FIXED: RoundCap)
-        arc_pen = QPen(teal_glow, 1.75, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap)
-        painter.setPen(arc_pen)
-        painter.drawArc(4, 4, 28, 28, 45 * 16, 190 * 16)
+        # Build horizontal layout for icon + text
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(12, 10, 14, 10)
+        layout.setSpacing(10)
         
-        # 2. Draw the Stylized Line-Art Book Spine & Cover
-        book_path = QPainterPath()
-        book_path.moveTo(10, 28)
-        book_path.lineTo(10, 14)
-        book_path.quadTo(12, 11, 16, 12)
-        book_path.lineTo(26, 8)
-        book_path.lineTo(26, 22)
-        book_path.quadTo(16, 25, 10, 28)
+        # 1. Icon Component
+        self.icon_label = QLabel(icon_str)
+        self.icon_label.setStyleSheet("font-size: 14px; background: transparent;")
+        layout.addWidget(self.icon_label, alignment=Qt.AlignmentFlag.AlignVCenter)
         
-        book_path.moveTo(10, 14)
-        book_path.quadTo(16, 16, 26, 12)
-        book_path.moveTo(10, 28)
-        book_path.lineTo(26, 22)
+        # 2. Text Label Component
+        self.text_label = QLabel(name_str)
+        self.text_label.setStyleSheet("""
+            font-family: 'Segoe UI'; 
+            font-weight: bold; 
+            font-size: 11px; 
+            background: transparent;
+        """)
+        layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignVCenter)
         
-        book_path.moveTo(16, 23)
-        book_path.lineTo(16, 29)
-        book_path.lineTo(13, 27)
-        
-        painter.drawPath(book_path)
+        # Hidden by default to keep menu beautifully compact
+        self.text_label.hide()
+        self.update_state_styling()
+
+    def setChecked(self, checked):
+        self.is_checked = checked
+        if self.is_checked:
+            self.text_label.show()
+        else:
+            self.text_label.hide()
+        self.update_state_styling()
+
+    def enterEvent(self, event):
+        """Reveal text dynamically when mouse cursor floats over the button boundary."""
+        self.text_label.show()
+        self.update_state_styling(hover=True)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        """Collapse text labels back down unless this specific tab is currently active."""
+        if not self.is_checked:
+            self.text_label.hide()
+        self.update_state_styling(hover=False)
+        super().leaveEvent(event)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.clicked.emit(self.index)
+            event.accept()
+
+    def update_state_styling(self, hover=False):
+        if self.is_checked:
+            self.setStyleSheet("""
+                QFrame#NavButtonContainer {
+                    background-color: #241b3f;
+                    border-radius: 8px;
+                    border-left: 3px solid #7b61ff;
+                }
+                QLabel { color: #7b61ff; }
+            """)
+        elif hover:
+            self.setStyleSheet("""
+                QFrame#NavButtonContainer {
+                    background-color: #1a142e;
+                    border-radius: 8px;
+                    border-left: 3px solid #4a3e63;
+                }
+                QLabel { color: #ffffff; }
+            """)
+        else:
+            self.setStyleSheet("""
+                QFrame#NavButtonContainer {
+                    background-color: transparent;
+                    border-radius: 8px;
+                    border-left: 3px solid transparent;
+                }
+                QLabel { color: #8c7fa6; }
+            """)
 
 class ArcaneSystemVisualizer(QWidget):
     """Custom vector-drawn visualizer replacing the plain text logger with a dynamic matrix canvas."""
@@ -214,68 +270,37 @@ class GrimoireMirror(QMainWindow):
         self.sidebar_frame = QFrame()
         self.sidebar_frame.setObjectName("SidebarDock")
         sidebar_layout = QVBoxLayout(self.sidebar_frame)
-        sidebar_layout.setContentsMargins(16, 24, 16, 24)
+        sidebar_layout.setContentsMargins(8, 20, 8, 20)
         sidebar_layout.setSpacing(8)
         
-        brand_box = QHBoxLayout()
-        brand_box.setContentsMargins(4, 0, 4, 24)
-        brand_box.setSpacing(12)
-        
-        vector_logo = GrimoireVectorLogo()
-        brand_box.addWidget(vector_logo, alignment=Qt.AlignmentFlag.AlignVCenter)
-        
-        text_stack = QVBoxLayout()
-        text_stack.setSpacing(1)
-        text_stack.setContentsMargins(0, 0, 0, 0)
-        
-        title_text = QLabel("Grimoire")
-        title_text.setStyleSheet("""
-            font-size: 20px; 
-            font-weight: 800; 
-            color: #c299ff; 
-            font-family: 'Segoe UI', -apple-system; 
-            letter-spacing: -0.2px;
-        """)
-        
-        subtitle_text = QLabel("Master OS")
-        subtitle_text.setStyleSheet("""
-            font-size: 11px; 
-            font-weight: 600; 
-            color: #61ffcf; 
-            font-family: 'Segoe UI', -apple-system; 
-            letter-spacing: 0.4px;
-            text-transform: uppercase;
-        """)
-        
-        text_stack.addWidget(title_text)
-        text_stack.addWidget(subtitle_text)
-        
-        brand_box.addLayout(text_stack)
-        brand_box.addStretch()
-        sidebar_layout.addLayout(brand_box)
+        brand_label = QLabel("🔮")
+        brand_style = "font-size: 16px; padding-bottom: 20px;"
+        brand_label.setStyleSheet(brand_style)
+        brand_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        sidebar_layout.addWidget(brand_label)
         
         self.nav_buttons = []
         modules = [
-            ("Dashboard", 0),
-            ("File Alchemy", 1),
-            ("Visual Alchemy", 2),
-            ("Creative Nexus", 3),
-            ("Deployment", 4),
-            ("Arcane Tuning", 5)
+            ("📊", "Dashboard", 0),
+            ("🧪", "File Alchemy", 1),
+            ("👁️", "Visual Alchemy", 2),
+            ("✨", "Creative Nexus", 3),
+            ("🚀", "Deployment", 4),
+            ("⚙️", "Arcane Tuning", 5)
         ]
         
-        for name, index in modules:
-            btn = QPushButton(name)
-            btn.setCheckable(True)
-            if index == 0: btn.setChecked(True)
-            btn.clicked.connect(lambda checked, idx=index: self.switch_workspace_view(idx))
+        for icon, name, index in modules:
+            btn = GrimoireNavButton(icon, name, index)
+            if index == 0: 
+                btn.setChecked(True)
+            btn.clicked.connect(self.switch_workspace_view)
             sidebar_layout.addWidget(btn)
             self.nav_buttons.append(btn)
             
         sidebar_layout.addStretch()
         
-        footer_tag = QLabel("v2.4.1")
-        footer_style = "color: #4a3e63; font-size: 10px; font-family: 'Consolas'; font-weight: bold;"
+        footer_tag = QLabel("⚙️")
+        footer_style = "color: #4a3e63; font-size: 12px;"
         footer_tag.setStyleSheet(footer_style)
         footer_tag.setAlignment(Qt.AlignmentFlag.AlignCenter)
         sidebar_layout.addWidget(footer_tag)
@@ -434,7 +459,6 @@ class GrimoireMirror(QMainWindow):
         
         right_col = QVBoxLayout()
         card_ai, layout_ai = self.create_card("Offline AI & Toy Forge", "Stable Diffusion Interface")
-        
         self.txt_ai_prompt = QLineEdit("gothic cottagecore item plush")
         layout_ai.addWidget(self.txt_ai_prompt)
         
@@ -469,7 +493,7 @@ class GrimoireMirror(QMainWindow):
         btn_export_apps.clicked.connect(lambda: self.cast_asynchronously(lambda: __import__('incantations').deep_cleaner.export_installed_software_replica()))
         layout_rep.addWidget(btn_export_apps)
         
-        self.txt_todo_replica = QTextEdit("[ ] REINSTALL: GoogleChrome\n[ ] REINSTALL: VLC\n[ ] REINSTALL: Steam")
+        self.txt_todo_replica = QTextEdit("[ ] REINSTALL: GoogleChrome\\n[ ] REINSTALL: VLC\\n[ ] REINSTALL: Steam")
         layout_rep.addWidget(self.txt_todo_replica)
         
         btn_run_bulk = QPushButton("🚀 Run Automated Silent Bulk Installer Loop")
@@ -493,7 +517,7 @@ class GrimoireMirror(QMainWindow):
         self.workspace_stack.addTab(page, "Arcane Tuning")
 
     def apply_theme(self):
-        self.setStyleSheet("""
+        self.setStyleSheet(\"\"\"
             QWidget#MainContainer {
                 background-color: #0b0813;
                 border: 1px solid #1f1833;
@@ -528,26 +552,6 @@ class GrimoireMirror(QMainWindow):
                 background-color: #120e1f;
                 border-right: 1px solid #1f1833;
                 border-bottom-left-radius: 11px;
-            }
-            QFrame#SidebarDock QPushButton {
-                background-color: transparent;
-                color: #8c7fa6;
-                border: none;
-                border-radius: 8px;
-                padding: 10px 15px;
-                font-family: 'Segoe UI';
-                font-weight: bold;
-                font-size: 11px;
-                text-align: left;
-            }
-            QFrame#SidebarDock QPushButton:hover {
-                background-color: #1a142e;
-                color: #ffffff;
-            }
-            QFrame#SidebarDock QPushButton:checked {
-                background-color: #241b3f;
-                color: #7b61ff;
-                border-left: 3px solid #7b61ff;
             }
             
             QTabWidget::panel { 
@@ -642,7 +646,7 @@ class GrimoireMirror(QMainWindow):
                 font-family: 'Segoe UI';
                 font-size: 11px;
             }
-        """)
+        \"\"\")
 
 if __name__ == "__main__":
     from PyQt6.QtWidgets import QApplication
