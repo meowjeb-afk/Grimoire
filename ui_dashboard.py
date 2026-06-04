@@ -1,9 +1,16 @@
 import sys
 import json
-from incantations import ecosystem_summoner
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QCheckBox, QTabWidget, QLineEdit, QTextEdit
+from PyQt6.QtWidgets import (
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+    QPushButton, QLabel, QCheckBox, QTabWidget, 
+    QLineEdit, QTextEdit
+)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from incantations import file_alchemy, asset_summoner, workspace_stasis, updater_scryer, purge_debloat, arcane_intel, scry_search, void_shield
+from incantations import (
+    file_alchemy, asset_summoner, workspace_stasis, 
+    updater_scryer, purge_debloat, arcane_intel, 
+    scry_search, void_shield, ecosystem_summoner
+)
 
 class ArcaneWorker(QThread):
     """Handles heavy asynchronous script tasks in the background to prevent GUI locking."""
@@ -25,7 +32,7 @@ class GrimoireMirror(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Grimoire Complete Optimization Suite")
-        self.setFixedSize(600, 500)
+        self.setFixedSize(600, 560)  # Height increased slightly to comfortably frame the workspace summoner
         
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
@@ -46,7 +53,7 @@ class GrimoireMirror(QMainWindow):
         page = QWidget()
         layout = QVBoxLayout(page)
         
-        header = QLabel("SYSTEM SYSTEM BLUEPRINTS")
+        header = QLabel("SYSTEM BLUEPRINTS")
         header.setStyleSheet("color: #00ffcc; font-size: 16px; font-weight: bold;")
         layout.addWidget(header)
         
@@ -95,6 +102,17 @@ class GrimoireMirror(QMainWindow):
     def init_tuning_tab(self):
         page = QWidget()
         layout = QVBoxLayout(page)
+        
+        # --- ECOSYSTEM SUMMONING ZONE ---
+        ecosystem_layout = QVBoxLayout()
+        eco_header = QLabel("🔮 ECOSYSTEM TRANSMUTATION MATRIX")
+        eco_header.setStyleSheet("color: #00ffcc; font-weight: bold; margin-top: 5px;")
+        ecosystem_layout.addWidget(eco_header)
+        
+        btn_summon = QPushButton("Summon My Core Workspace Ecosystem")
+        btn_summon.clicked.connect(lambda: self.cast_asynchronously(ecosystem_summoner.summon_bundle))
+        ecosystem_layout.addWidget(btn_summon)
+        layout.addLayout(ecosystem_layout)
         
         layout.addWidget(QLabel("System Operational Log Console Output:"))
         self.console_out = QTextEdit()
