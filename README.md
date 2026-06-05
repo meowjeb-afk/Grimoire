@@ -25,21 +25,31 @@ The architecture maintains strict decoupling between the graphical rendering eng
 
 ```
 
-Grimoire/
-├── main.py                  # Auto-elevated master bootloader & system tray layer
-├── ui_dashboard.py          # Asynchronous, multi-tab PyQt6 UI Control panel
-├── database/
-│   └── runes.json           # Local relative configuration data matrix
-├── incantations/            # Discrete, dynamic automation modules
-│   ├── __init__.py          
-│   ├── arcane_intel.py      # Local LLM integration (Ollama)
-│   ├── asset_summoner.py    # Automated design asset API harvester
-│   ├── clipboard_magic.py   # Global clipboard interception tools
-│   ├── file_alchemy.py      # Extension-based directory organization
-│   ├── purge_debloat.py     # Native Windows package purging
-│   ├── scry_search.py       # High-performance filesystem scanning
-│   ├── text_expansion.py    # Real-time keyboard shorthand expands
-│   ├── updater_scryer.py    # Winget application scanner
-│   ├── void_shield.py       # Hosts-layer telemetry firewall
-│   └── workspace_stasis.py  # Win32 window coordinate snapshots
-└── assets/                  # Custom visual themes, UI profiles, and icons
+Grimoire_OS/  <-- (Your Root Folder)
+│
+├── main.py                 <-- (The new entry point. You run this!)
+├── ui_dashboard_OLD.py     <-- (Your old monolithic file. Renamed so it doesn't interfere)
+│
+── assets/                 <-- (Your images and icons. Untouched)
+│   ├── grimoire_logo.png
+│   ├── grimoire_text.png
+│   ├── 0.png
+│   └── ...
+│
+├── incantations/           <-- (Your existing backend logic. Untouched)
+│   ├── __init__.py
+│   ├── file_alchemy.py
+│   ├── image_matrix.py
+│   ├── deep_cleaner.py
+│   └── ...
+│
+├── core/                   <-- (NEW: The AI engines we just added)
+│   ├── __init__.py
+│   ├── ai_suite.py         <-- (DesignSuite & AdvancedDesignExtensions)
+│   └── workers.py          <-- (Background threading)
+│
+└── ui/                     <-- (NEW: The modularized PyQt6 interface)
+    ├── __init__.py
+    ├── custom_widgets.py   <-- (Nav buttons, charts, visualizer)
+    ├── main_window.py      <-- (The main GrimoireMirror class)
+    └── tabs.py             <-- (Dashboard, Visual Alchemy, Task Viewer, etc.)
