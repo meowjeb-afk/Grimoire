@@ -213,3 +213,190 @@ class TuningMixin:
         self.chk_disable_animations = QCheckBox("Disable Windows UI Animations"); self.chk_disable_animations.setStyleSheet("color: #c9bedf; font-size: 11px; background: transparent;"); layout_perf.addWidget(self.chk_disable_animations)
         btn_apply_tuning = QPushButton("⚡ Apply Performance Tuning"); btn_apply_tuning.setObjectName("ActionButton"); layout_perf.addWidget(btn_apply_tuning); layout_perf.addStretch(); two_col.addWidget(card_perf, stretch=1)
         main_layout.addLayout(two_col); main_layout.addStretch(); self.workspace_stack.addTab(page, "Arcane Tuning")
+
+# ==========================================
+# NEW MODULE MIXINS
+# ==========================================
+
+class OpticalScryingMixin:
+    def init_optical_scrying_tab(self):
+        page = QWidget()
+        page.setStyleSheet("background-color: #0b0813;")
+        main_layout = QVBoxLayout(page)
+        main_layout.setContentsMargins(20, 16, 20, 20)
+        main_layout.setSpacing(16)
+        
+        page_header = QLabel("👁️ OPTICAL SCRYING")
+        page_header.setStyleSheet("color: #7b61ff; font-size: 18px; font-weight: bold; letter-spacing: 1px; font-family: 'Segoe UI'; background: transparent;")
+        main_layout.addWidget(page_header)
+        
+        group_style = """QGroupBox { color: #a397bf; font-weight: bold; border: 1px solid #251d3a; border-radius: 8px; margin-top: 8px; padding-top: 8px; background-color: #171226; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px 0 3px; }"""
+        
+        # OCR Section
+        group_ocr = QGroupBox("📜 Text Extraction (OCR)")
+        group_ocr.setStyleSheet(group_style)
+        layout_ocr = QVBoxLayout(group_ocr)
+        layout_ocr.setSpacing(10)
+        
+        ocr_row = QHBoxLayout()
+        self.txt_ocr_path = QLineEdit()
+        self.txt_ocr_path.setPlaceholderText("Path to image...")
+        btn_ocr_browse = QPushButton("")
+        btn_ocr_browse.setFixedWidth(40)
+        btn_ocr_browse.setObjectName("ActionButton")
+        btn_ocr_browse.clicked.connect(lambda: self.txt_ocr_path.setText(QFileDialog.getOpenFileName(self, "Select Image", "", "Images (*.png *.jpg *.jpeg)")[0]))
+        btn_ocr_extract = QPushButton("🔮 Extract Text")
+        btn_ocr_extract.setObjectName("ActionButton")
+        btn_ocr_extract.clicked.connect(self.run_ocr_extraction)
+        ocr_row.addWidget(self.txt_ocr_path, stretch=1)
+        ocr_row.addWidget(btn_ocr_browse)
+        ocr_row.addWidget(btn_ocr_extract)
+        layout_ocr.addLayout(ocr_row)
+        
+        self.txt_ocr_output = QTextEdit()
+        self.txt_ocr_output.setReadOnly(True)
+        self.txt_ocr_output.setPlaceholderText("Scryed text will appear here...")
+        self.txt_ocr_output.setStyleSheet("background-color: #0b0813; color: #61ffcf; border: 1px solid #251d3a; border-radius: 6px; font-family: 'Consolas'; font-size: 11px; padding: 8px;")
+        layout_ocr.addWidget(self.txt_ocr_output)
+        main_layout.addWidget(group_ocr)
+
+        # Screenshot Section
+        group_cap = QGroupBox("📸 Screen Capture")
+        group_cap.setStyleSheet(group_style)
+        layout_cap = QVBoxLayout(group_cap)
+        layout_cap.setSpacing(10)
+        
+        btn_capture = QPushButton("📸 Capture Primary Monitor")
+        btn_capture.setObjectName("ActionButton")
+        btn_capture.clicked.connect(self.run_screen_capture)
+        layout_cap.addWidget(btn_capture)
+        main_layout.addWidget(group_cap)
+        main_layout.addStretch()
+        self.workspace_stack.addTab(page, "Optical Scrying")
+
+class NetworkScryingMixin:
+    def init_network_scrying_tab(self):
+        page = QWidget()
+        page.setStyleSheet("background-color: #0b0813;")
+        main_layout = QVBoxLayout(page)
+        main_layout.setContentsMargins(20, 16, 20, 20)
+        main_layout.setSpacing(16)
+        
+        page_header = QLabel("🕸️ NETWORK SCRYING")
+        page_header.setStyleSheet("color: #7b61ff; font-size: 18px; font-weight: bold; letter-spacing: 1px; font-family: 'Segoe UI'; background: transparent;")
+        main_layout.addWidget(page_header)
+
+        group_style = """QGroupBox { color: #a397bf; font-weight: bold; border: 1px solid #251d3a; border-radius: 8px; margin-top: 8px; padding-top: 8px; background-color: #171226; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px 0 3px; }"""
+
+        # Port Scanner
+        group_port = QGroupBox("🚪 Port Scrying")
+        group_port.setStyleSheet(group_style)
+        layout_port = QVBoxLayout(group_port)
+        layout_port.setSpacing(10)
+        
+        port_row = QHBoxLayout()
+        self.txt_scan_ip = QLineEdit("127.0.0.1")
+        self.txt_scan_ip.setPlaceholderText("Target IP...")
+        btn_scan = QPushButton("🔍 Scan Common Ports")
+        btn_scan.setObjectName("ActionButton")
+        btn_scan.clicked.connect(self.run_port_scan)
+        port_row.addWidget(self.txt_scan_ip, stretch=1)
+        port_row.addWidget(btn_scan)
+        layout_port.addLayout(port_row)
+        
+        self.txt_port_output = QTextEdit()
+        self.txt_port_output.setReadOnly(True)
+        self.txt_port_output.setMaximumHeight(150)
+        self.txt_port_output.setStyleSheet("background-color: #0b0813; color: #61ffcf; border: 1px solid #251d3a; border-radius: 6px; font-family: 'Consolas'; font-size: 11px; padding: 8px;")
+        layout_port.addWidget(self.txt_port_output)
+        main_layout.addWidget(group_port)
+
+        # Ping Tracker
+        group_ping = QGroupBox("📡 Ping Tracker")
+        group_ping.setStyleSheet(group_style)
+        layout_ping = QVBoxLayout(group_ping)
+        layout_ping.setSpacing(10)
+        
+        ping_row = QHBoxLayout()
+        self.txt_ping_host = QLineEdit("8.8.8.8")
+        self.txt_ping_host.setPlaceholderText("Host to ping...")
+        btn_ping = QPushButton("📡 Ping")
+        btn_ping.setObjectName("ActionButton")
+        btn_ping.clicked.connect(self.run_ping)
+        ping_row.addWidget(self.txt_ping_host, stretch=1)
+        ping_row.addWidget(btn_ping)
+        layout_ping.addLayout(ping_row)
+        
+        self.lbl_ping_result = QLabel("Awaiting scry...")
+        self.lbl_ping_result.setStyleSheet("color: #a397bf; font-size: 12px; font-family: 'Consolas'; background: transparent;")
+        layout_ping.addWidget(self.lbl_ping_result)
+        main_layout.addWidget(group_ping)
+        main_layout.addStretch()
+        self.workspace_stack.addTab(page, "Network Scrying")
+
+class AutomationWeaverMixin:
+    def init_automation_weaver_tab(self):
+        page = QWidget()
+        page.setStyleSheet("background-color: #0b0813;")
+        main_layout = QVBoxLayout(page)
+        main_layout.setContentsMargins(20, 16, 20, 20)
+        main_layout.setSpacing(16)
+        
+        page_header = QLabel("🕸️ AUTOMATION WEAVER")
+        page_header.setStyleSheet("color: #7b61ff; font-size: 18px; font-weight: bold; letter-spacing: 1px; font-family: 'Segoe UI'; background: transparent;")
+        main_layout.addWidget(page_header)
+
+        group_style = """QGroupBox { color: #a397bf; font-weight: bold; border: 1px solid #251d3a; border-radius: 8px; margin-top: 8px; padding-top: 8px; background-color: #171226; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px 0 3px; }"""
+
+        group_idle = QGroupBox("⏳ Idle Detection & Triggers")
+        group_idle.setStyleSheet(group_style)
+        layout_idle = QVBoxLayout(group_idle)
+        layout_idle.setSpacing(10)
+        
+        self.lbl_idle_time = QLabel("System Idle: 0.0s")
+        self.lbl_idle_time.setStyleSheet("color: #61ffcf; font-size: 14px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+        layout_idle.addWidget(self.lbl_idle_time)
+        
+        btn_check_idle = QPushButton("👁️ Check Current Idle Time")
+        btn_check_idle.setObjectName("ActionButton")
+        btn_check_idle.clicked.connect(self.check_idle_time)
+        layout_idle.addWidget(btn_check_idle)
+        
+        info_lbl = QLabel("Configure automated spells to trigger when the system is idle.")
+        info_lbl.setStyleSheet("color: #645585; font-size: 10px; font-style: italic; background: transparent;")
+        layout_idle.addWidget(info_lbl)
+        main_layout.addWidget(group_idle)
+        main_layout.addStretch()
+        self.workspace_stack.addTab(page, "Automation Weaver")
+
+class ClipboardGrimoireMixin:
+    def init_clipboard_grimoire_tab(self):
+        page = QWidget()
+        page.setStyleSheet("background-color: #0b0813;")
+        main_layout = QVBoxLayout(page)
+        main_layout.setContentsMargins(20, 16, 20, 20)
+        main_layout.setSpacing(16)
+        
+        page_header = QLabel("📋 CLIPBOARD GRIMOIRE")
+        page_header.setStyleSheet("color: #7b61ff; font-size: 18px; font-weight: bold; letter-spacing: 1px; font-family: 'Segoe UI'; background: transparent;")
+        main_layout.addWidget(page_header)
+
+        group_style = """QGroupBox { color: #a397bf; font-weight: bold; border: 1px solid #251d3a; border-radius: 8px; margin-top: 8px; padding-top: 8px; background-color: #171226; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px 0 3px; }"""
+
+        group_hist = QGroupBox("📜 Infinite History")
+        group_hist.setStyleSheet(group_style)
+        layout_hist = QVBoxLayout(group_hist)
+        layout_hist.setSpacing(10)
+        
+        self.list_clipboard = QListWidget()
+        self.list_clipboard.setStyleSheet("background-color: #0b0813; color: #c9bedf; border: 1px solid #251d3a; border-radius: 6px; font-family: 'Consolas'; font-size: 11px; padding: 4px;")
+        self.list_clipboard.itemClicked.connect(self.restore_clipboard_item)
+        layout_hist.addWidget(self.list_clipboard)
+        
+        btn_clear = QPushButton("🗑️ Purge History")
+        btn_clear.setObjectName("SecondaryButton")
+        btn_clear.clicked.connect(self.clear_clipboard_history)
+        layout_hist.addWidget(btn_clear)
+        main_layout.addWidget(group_hist)
+        main_layout.addStretch()
+        self.workspace_stack.addTab(page, "Clipboard Grimoire")
