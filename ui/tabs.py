@@ -4,14 +4,15 @@ from PyQt6.QtWidgets import (
     QSpinBox, QScrollArea, QGroupBox, QFileDialog, QSizePolicy
 )
 from PyQt6.QtCore import Qt
+from ui.custom_widgets import ColorPreservingLabel, PerformanceChart
+from core.ai_suite import HEAVY_DEPS_AVAILABLE
 
 class DashboardMixin:
     def init_core_tab(self):
         page = QWidget(); page.setStyleSheet("background-color: #0b0813;")
         main_layout = QVBoxLayout(page); main_layout.setContentsMargins(20, 16, 20, 20); main_layout.setSpacing(16)
         top_bar = QHBoxLayout()
-        # FIX: Logo text sizing
-        page_title = self.ColorPreservingLabel(self.logo_text_path)
+        page_title = ColorPreservingLabel(self.logo_text_path)
         page_title.setFixedHeight(40)
         page_title.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         top_bar.addWidget(page_title); top_bar.addStretch(); main_layout.addLayout(top_bar)
@@ -29,7 +30,7 @@ class DashboardMixin:
         main_layout.addLayout(stats_row)
         
         content_row = QHBoxLayout(); content_row.setSpacing(12)
-        self.performance_chart = self.PerformanceChart(); chart_layout = QVBoxLayout(); chart_layout.addWidget(self.performance_chart, stretch=1)
+        self.performance_chart = PerformanceChart(); chart_layout = QVBoxLayout(); chart_layout.addWidget(self.performance_chart, stretch=1)
         chart_container = QFrame(); chart_container.setObjectName("ChartCard"); chart_container.setLayout(chart_layout); content_row.addWidget(chart_container, stretch=2)
         main_layout.addLayout(content_row, stretch=1)
         self.workspace_stack.addTab(page, "Dashboard")
@@ -39,14 +40,15 @@ class FileAlchemyMixin:
         page = QWidget(); page.setStyleSheet("background-color: #0b0813;")
         main_layout = QVBoxLayout(page); main_layout.setContentsMargins(20, 16, 20, 20); main_layout.setSpacing(16)
         header = QHBoxLayout(); page_header = QLabel("🧪 FILE ALCHEMY"); page_header.setStyleSheet("color: #7b61ff; font-size: 18px; font-weight: bold;"); header.addWidget(page_header); header.addStretch(); main_layout.addLayout(header)
-        card_dir, layout_dir = self.create_card(" Directory Sorting Vector", "Organize files by type, date, or custom rules", "")
+        card_dir, layout_dir = self.create_card("📁 Directory Sorting Vector", "Organize files by type, date, or custom rules", "")
         path_row = QHBoxLayout(); path_lbl = QLabel("Target Path:"); path_row.addWidget(path_lbl)
         self.txt_path = QLineEdit(r"C:\Users\Public\Downloads"); path_row.addWidget(self.txt_path, stretch=1)
-        btn_browse_dir = QPushButton("📁 Browse"); btn_browse_dir.setFixedWidth(90); btn_browse_dir.setObjectName("ActionButton")
+        btn_browse_dir = QPushButton(" Browse"); btn_browse_dir.setFixedWidth(90); btn_browse_dir.setObjectName("ActionButton")
         btn_browse_dir.clicked.connect(lambda: self.txt_path.setText(QFileDialog.getExistingDirectory(self, "Select Folder"))); path_row.addWidget(btn_browse_dir); layout_dir.addLayout(path_row)
-        btn_run_sort = QPushButton("⚗️ Execute File Alchemy Sorting"); btn_run_sort.setObjectName("ActionButton"); layout_dir.addWidget(btn_run_sort)
+        btn_run_sort = QPushButton("️ Execute File Alchemy Sorting"); btn_run_sort.setObjectName("ActionButton"); layout_dir.addWidget(btn_run_sort)
         card_dir.setStyleSheet("QFrame#DashboardCard { background-color: #171226; border: 1px solid #251d3a; border-radius: 12px; }"); main_layout.addWidget(card_dir); main_layout.addStretch()
         self.workspace_stack.addTab(page, "File Alchemy")
+
 class VisualAlchemyMixin:
     def init_visual_alchemy_tab(self):
         page = QWidget(); page.setStyleSheet("background-color: #0b0813;")
@@ -89,14 +91,15 @@ class VisualAlchemyMixin:
         self.lbl_contrast = QLabel("100%"); self.lbl_contrast.setFixedWidth(40); contrast_row.addWidget(self.lbl_contrast)
         btn_apply_contrast = QPushButton("Apply"); btn_apply_contrast.setFixedWidth(60); btn_apply_contrast.setObjectName("ActionButton"); btn_apply_contrast.clicked.connect(lambda: self.adjust_contrast(self.slider_contrast.value())); contrast_row.addWidget(btn_apply_contrast)
         self.slider_contrast.valueChanged.connect(lambda v: self.lbl_contrast.setText(f"{v}%")); layout_color.addLayout(contrast_row)
-        filter_row = QHBoxLayout(); btn_grayscale = QPushButton("⚫ Grayscale"); btn_grayscale.setObjectName("ActionButton"); btn_grayscale.clicked.connect(self.apply_grayscale); filter_row.addWidget(btn_grayscale)
+        filter_row = QHBoxLayout(); btn_grayscale = QPushButton(" Grayscale"); btn_grayscale.setObjectName("ActionButton"); btn_grayscale.clicked.connect(self.apply_grayscale); filter_row.addWidget(btn_grayscale)
         btn_sepia = QPushButton("🟤 Sepia"); btn_sepia.setObjectName("ActionButton"); btn_sepia.clicked.connect(self.apply_sepia); filter_row.addWidget(btn_sepia)
         btn_invert = QPushButton("◐ Invert"); btn_invert.setObjectName("ActionButton"); btn_invert.clicked.connect(self.invert_colors); filter_row.addWidget(btn_invert); layout_color.addLayout(filter_row)
         content_layout.addWidget(group_color)
 
         # 4. Effects
         group_effects = QGroupBox("✨ Effects & Filters"); group_effects.setStyleSheet(group_style); layout_effects = QVBoxLayout(group_effects); layout_effects.setSpacing(8)
-        blur_row = QHBoxLayout(); blur_row.addWidget(QLabel("Blur:")); self.slider_blur = QSlider(Qt.Orientation.Horizontal); self.slider_blur.setRange(0, 10); self.slider_blur.setValue(2); self.slider_blur.setFixedWidth(150); blur_row.addWidget(self.slider_blur)        self.lbl_blur = QLabel("2px"); self.lbl_blur.setFixedWidth(40); blur_row.addWidget(self.lbl_blur)
+        blur_row = QHBoxLayout(); blur_row.addWidget(QLabel("Blur:")); self.slider_blur = QSlider(Qt.Orientation.Horizontal); self.slider_blur.setRange(0, 10); self.slider_blur.setValue(2); self.slider_blur.setFixedWidth(150); blur_row.addWidget(self.slider_blur)
+        self.lbl_blur = QLabel("2px"); self.lbl_blur.setFixedWidth(40); blur_row.addWidget(self.lbl_blur)
         btn_apply_blur = QPushButton("Apply"); btn_apply_blur.setFixedWidth(60); btn_apply_blur.setObjectName("ActionButton"); btn_apply_blur.clicked.connect(lambda: self.apply_blur(self.slider_blur.value())); blur_row.addWidget(btn_apply_blur)
         self.slider_blur.valueChanged.connect(lambda v: self.lbl_blur.setText(f"{v}px")); layout_effects.addLayout(blur_row)
         sharpen_row = QHBoxLayout(); sharpen_row.addWidget(QLabel("Sharpen:")); self.slider_sharpen = QSlider(Qt.Orientation.Horizontal); self.slider_sharpen.setRange(0, 200); self.slider_sharpen.setValue(100); self.slider_sharpen.setFixedWidth(150); sharpen_row.addWidget(self.slider_sharpen)
@@ -107,22 +110,22 @@ class VisualAlchemyMixin:
 
         # 5. AI & Production Suite
         group_ai_suite = QGroupBox("🤖 AI & Production Suite"); group_ai_suite.setStyleSheet(group_style); layout_ai_suite = QVBoxLayout(group_ai_suite); layout_ai_suite.setSpacing(10)
-        if not self.HEAVY_DEPS_AVAILABLE or self.design_suite is None:
+        if not HEAVY_DEPS_AVAILABLE or self.design_suite is None:
             ai_warning = QLabel("⚠️ AI dependencies missing. Install via: pip install opencv-python torch diffusers rembg"); ai_warning.setStyleSheet("color: #ff6b6b; font-size: 10px; background: transparent;"); ai_warning.setWordWrap(True); layout_ai_suite.addWidget(ai_warning)
         else:
             btn_isolate = QPushButton("✂️ AI Subject Isolator (Remove Background)"); btn_isolate.setObjectName("ActionButton"); btn_isolate.clicked.connect(self.run_subject_isolator); layout_ai_suite.addWidget(btn_isolate)
             upscale_row = QHBoxLayout(); upscale_row.addWidget(QLabel("AI Upscale Factor:")); self.spin_upscale = QSpinBox(); self.spin_upscale.setRange(2, 4); self.spin_upscale.setValue(2); self.spin_upscale.setFixedWidth(60); upscale_row.addWidget(self.spin_upscale)
             btn_upscale = QPushButton("⬆️ Super Resolution Upscale"); btn_upscale.setObjectName("ActionButton"); btn_upscale.clicked.connect(self.run_upscaler); upscale_row.addWidget(btn_upscale); upscale_row.addStretch(); layout_ai_suite.addLayout(upscale_row)
-            btn_tiler = QPushButton("🔄 Generate Seamless Texture Tile"); btn_tiler.setObjectName("ActionButton"); btn_tiler.clicked.connect(self.run_seamless_tiler); layout_ai_suite.addWidget(btn_tiler)
-            palette_row = QHBoxLayout(); btn_palette = QPushButton("🎨 Extract Color Palette"); btn_palette.setObjectName("ActionButton"); btn_palette.clicked.connect(self.run_palette_harmonizer); palette_row.addWidget(btn_palette)
+            btn_tiler = QPushButton(" Generate Seamless Texture Tile"); btn_tiler.setObjectName("ActionButton"); btn_tiler.clicked.connect(self.run_seamless_tiler); layout_ai_suite.addWidget(btn_tiler)
+            palette_row = QHBoxLayout(); btn_palette = QPushButton(" Extract Color Palette"); btn_palette.setObjectName("ActionButton"); btn_palette.clicked.connect(self.run_palette_harmonizer); palette_row.addWidget(btn_palette)
             self.lbl_palette_output = QLabel("No palette extracted yet."); self.lbl_palette_output.setStyleSheet("color: #61ffcf; font-size: 10px; font-family: 'Consolas'; background: transparent;"); palette_row.addWidget(self.lbl_palette_output); palette_row.addStretch(); layout_ai_suite.addLayout(palette_row)
             style_row = QHBoxLayout(); style_row.addWidget(QLabel("Style Prompt:")); self.txt_style_prompt = QLineEdit("cyberpunk, neon lights, highly detailed"); style_row.addWidget(self.txt_style_prompt, stretch=1)
             btn_style = QPushButton("✨ Apply Style Transfer"); btn_style.setObjectName("ActionButton"); btn_style.clicked.connect(self.run_style_transfer); style_row.addWidget(btn_style); layout_ai_suite.addLayout(style_row)
             inpaint_row = QHBoxLayout(); inpaint_row.addWidget(QLabel("Inpaint Prompt:")); self.txt_inpaint_prompt = QLineEdit("a red apple"); inpaint_row.addWidget(self.txt_inpaint_prompt, stretch=1)
-            btn_inpaint = QPushButton("️ Inpaint (Requires Mask)"); btn_inpaint.setObjectName("ActionButton"); btn_inpaint.clicked.connect(self.run_context_inpaint); inpaint_row.addWidget(btn_inpaint); layout_ai_suite.addLayout(inpaint_row)
+            btn_inpaint = QPushButton("🖌️ Inpaint (Requires Mask)"); btn_inpaint.setObjectName("ActionButton"); btn_inpaint.clicked.connect(self.run_context_inpaint); inpaint_row.addWidget(btn_inpaint); layout_ai_suite.addLayout(inpaint_row)
         content_layout.addWidget(group_ai_suite)
 
-        # 6. Advanced Production Core (NO SVG)
+        # 6. Advanced Production Core
         group_advanced = QGroupBox("🎨 Advanced Production Core"); group_advanced.setStyleSheet(group_style); layout_advanced = QVBoxLayout(group_advanced); layout_advanced.setSpacing(10)
         if self.advanced_extensions is None:
             adv_warning = QLabel("⚠️ Advanced extensions unavailable."); adv_warning.setStyleSheet("color: #ff6b6b; font-size: 10px; background: transparent;"); layout_advanced.addWidget(adv_warning)
@@ -130,13 +133,13 @@ class VisualAlchemyMixin:
             btn_pbr = QPushButton("🗺️ Generate PBR Maps (Normal/Displacement)"); btn_pbr.setObjectName("ActionButton"); btn_pbr.clicked.connect(self.run_pbr_maps); layout_advanced.addWidget(btn_pbr)
             composite_row = QHBoxLayout(); composite_row.addWidget(QLabel("Background Image:")); self.txt_bg_path = QLineEdit(""); self.txt_bg_path.setPlaceholderText("Select background for compositing..."); composite_row.addWidget(self.txt_bg_path, stretch=1)
             btn_browse_bg = QPushButton(" Browse"); btn_browse_bg.setFixedWidth(70); btn_browse_bg.setObjectName("ActionButton"); btn_browse_bg.clicked.connect(self.browse_background_image); composite_row.addWidget(btn_browse_bg); layout_advanced.addLayout(composite_row)
-            btn_composite = QPushButton("📐 Composite Layers"); btn_composite.setObjectName("ActionButton"); btn_composite.clicked.connect(self.run_composite_layers); layout_advanced.addWidget(btn_composite)
+            btn_composite = QPushButton(" Composite Layers"); btn_composite.setObjectName("ActionButton"); btn_composite.clicked.connect(self.run_composite_layers); layout_advanced.addWidget(btn_composite)
         content_layout.addWidget(group_advanced)
 
         # 7. Save & Export
-        group_save = QGroupBox(" Save & Export"); group_save.setStyleSheet(group_style); layout_save = QVBoxLayout(group_save); layout_save.setSpacing(10)
+        group_save = QGroupBox("💾 Save & Export"); group_save.setStyleSheet(group_style); layout_save = QVBoxLayout(group_save); layout_save.setSpacing(10)
         btn_save = QPushButton("💾 Save Edited Image"); btn_save.setObjectName("ActionButton"); btn_save.setFixedHeight(40); btn_save.clicked.connect(self.save_current_image); layout_save.addWidget(btn_save)
-        btn_reset = QPushButton("🔄 Reset to Original"); btn_reset.setObjectName("SecondaryButton"); btn_reset.clicked.connect(self.reset_image); layout_save.addWidget(btn_reset)
+        btn_reset = QPushButton(" Reset to Original"); btn_reset.setObjectName("SecondaryButton"); btn_reset.clicked.connect(self.reset_image); layout_save.addWidget(btn_reset)
         content_layout.addWidget(group_save)
 
         content_layout.addStretch(); scroll.setWidget(inner_widget); left_layout.addWidget(scroll, stretch=1)
@@ -144,9 +147,10 @@ class VisualAlchemyMixin:
         # RIGHT COLUMN: Preview
         right_column = QFrame(); right_column.setObjectName("AssetPreviewColumn"); right_column.setFixedWidth(350)
         right_layout = QVBoxLayout(right_column); right_layout.setContentsMargins(0, 0, 0, 0); right_layout.setSpacing(10)
-        preview_header = QLabel("🖼️ ASSET PREVIEW BAY"); preview_header.setStyleSheet("color: #7b61ff; font-size: 12px; font-weight: bold; letter-spacing: 1px; background: transparent;"); right_layout.addWidget(preview_header)
-        self.preview_window = QLabel(); self.preview_window.setObjectName("ImagePreviewBay"); self.preview_window.setAlignment(Qt.AlignmentFlag.AlignCenter); self.preview_window.setMinimumSize(310, 350); self.preview_window.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding); self.preview_window.setWordWrap(True); self.preview_window.setText("⬇\n\nDrag & Drop\nImage Here\n\nor use Browse")        self.preview_window.setStyleSheet("QLabel#ImagePreviewBay { background-color: #08060f; border: 2px dashed #251d3a; border-radius: 14px; color: #52476d; font-family: 'Segoe UI'; font-size: 11px; }"); self.preview_window.setAcceptDrops(True); right_layout.addWidget(self.preview_window, stretch=1)
-        btn_browse_preview = QPushButton("📁 Browse File"); btn_browse_preview.setFixedHeight(36); btn_browse_preview.setObjectName("ActionButton"); btn_browse_preview.clicked.connect(self.browse_for_image); right_layout.addWidget(btn_browse_preview)
+        preview_header = QLabel("️ ASSET PREVIEW BAY"); preview_header.setStyleSheet("color: #7b61ff; font-size: 12px; font-weight: bold; letter-spacing: 1px; background: transparent;"); right_layout.addWidget(preview_header)
+        self.preview_window = QLabel(); self.preview_window.setObjectName("ImagePreviewBay"); self.preview_window.setAlignment(Qt.AlignmentFlag.AlignCenter); self.preview_window.setMinimumSize(310, 350); self.preview_window.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding); self.preview_window.setWordWrap(True); self.preview_window.setText("\n\nDrag & Drop\nImage Here\n\nor use Browse")
+        self.preview_window.setStyleSheet("QLabel#ImagePreviewBay { background-color: #08060f; border: 2px dashed #251d3a; border-radius: 14px; color: #52476d; font-family: 'Segoe UI'; font-size: 11px; }"); self.preview_window.setAcceptDrops(True); right_layout.addWidget(self.preview_window, stretch=1)
+        btn_browse_preview = QPushButton(" Browse File"); btn_browse_preview.setFixedHeight(36); btn_browse_preview.setObjectName("ActionButton"); btn_browse_preview.clicked.connect(self.browse_for_image); right_layout.addWidget(btn_browse_preview)
         info_label = QLabel("📋 Drop images or use Browse to load assets"); info_label.setStyleSheet("color: #645585; font-size: 9px; font-family: 'Segoe UI'; background: transparent;"); info_label.setAlignment(Qt.AlignmentFlag.AlignCenter); info_label.setWordWrap(True); right_layout.addWidget(info_label); right_layout.addStretch()
         content_row.addWidget(left_column, stretch=2); content_row.addWidget(right_column, stretch=1); main_layout.addLayout(content_row, stretch=1)
 
@@ -161,18 +165,18 @@ class DeploymentMixin:
         main_layout = QVBoxLayout(page); main_layout.setContentsMargins(20, 16, 20, 20); main_layout.setSpacing(16)
         page_header = QLabel("🚀 DEPLOYMENT ARCHITECT"); page_header.setStyleSheet("color: #7b61ff; font-size: 18px; font-weight: bold;"); main_layout.addWidget(page_header)
         two_col = QHBoxLayout(); two_col.setSpacing(16)
-        card_rep, layout_rep = self.create_card("OS Deployment Replicator", "Backup & Restore", "️"); card_rep.setStyleSheet("QFrame#DashboardCard { background-color: #171226; border: 1px solid #251d3a; border-radius: 12px; }")
+        card_rep, layout_rep = self.create_card("OS Deployment Replicator", "Backup & Restore", "🛡️"); card_rep.setStyleSheet("QFrame#DashboardCard { background-color: #171226; border: 1px solid #251d3a; border-radius: 12px; }")
         btn_restore = QPushButton("🛡️ Generate Safe System Restore Checkpoint"); btn_restore.setObjectName("ActionButton"); layout_rep.addWidget(btn_restore); layout_rep.addStretch(); two_col.addWidget(card_rep, stretch=1)
-        card_bulk, layout_bulk = self.create_card("Silent Bulk Installer", "Automated Deployment Loop", ""); card_bulk.setStyleSheet("QFrame#DashboardCard { background-color: #171226; border: 1px solid #251d3a; border-radius: 12px; }")
+        card_bulk, layout_bulk = self.create_card("Silent Bulk Installer", "Automated Deployment Loop", "📦"); card_bulk.setStyleSheet("QFrame#DashboardCard { background-color: #171226; border: 1px solid #251d3a; border-radius: 12px; }")
         self.txt_todo_replica = QTextEdit(); self.txt_todo_replica.setPlainText("[ ] REINSTALL: GoogleChrome\n[ ] REINSTALL: VLC"); self.txt_todo_replica.setMaximumHeight(140); layout_bulk.addWidget(self.txt_todo_replica)
-        btn_run_bulk = QPushButton("🚀 Run Automated Silent Bulk Installer Loop"); btn_run_bulk.setObjectName("ActionButton"); layout_bulk.addWidget(btn_run_bulk); two_col.addWidget(card_bulk, stretch=1)
+        btn_run_bulk = QPushButton(" Run Automated Silent Bulk Installer Loop"); btn_run_bulk.setObjectName("ActionButton"); layout_bulk.addWidget(btn_run_bulk); two_col.addWidget(card_bulk, stretch=1)
         main_layout.addLayout(two_col); main_layout.addStretch(); self.workspace_stack.addTab(page, "Deployment")
 
 class TaskViewerMixin:
     def init_task_viewer_tab(self):
         page = QWidget(); page.setStyleSheet("background-color: #0b0813;")
         main_layout = QVBoxLayout(page); main_layout.setContentsMargins(20, 16, 20, 20); main_layout.setSpacing(12)
-        page_header = QLabel(" TASK VIEWER"); page_header.setStyleSheet("color: #7b61ff; font-size: 18px; font-weight: bold;"); main_layout.addWidget(page_header)
+        page_header = QLabel("🧠 TASK VIEWER"); page_header.setStyleSheet("color: #7b61ff; font-size: 18px; font-weight: bold;"); main_layout.addWidget(page_header)
         toolbar = QHBoxLayout(); toolbar.setSpacing(10)
         self.txt_process_filter = QLineEdit(); self.txt_process_filter.setPlaceholderText("🔍 Filter processes by name..."); self.txt_process_filter.setFixedHeight(30); self.txt_process_filter.textChanged.connect(self._filter_processes); toolbar.addWidget(self.txt_process_filter, stretch=1)
         btn_refresh = QPushButton("🔄 Refresh"); btn_refresh.setFixedHeight(30); btn_refresh.setFixedWidth(90); btn_refresh.setObjectName("ActionButton"); btn_refresh.clicked.connect(lambda: self.refresh_process_view()); toolbar.addWidget(btn_refresh)
@@ -194,7 +198,8 @@ class TaskViewerMixin:
         if selection_model is None or not selection_model.selectedRows(): return
         row = selection_model.selectedRows()[0].row(); item = self.process_table.item(row, 0)
         if item: 
-            try: self.kill_process(int(item.text()))            except ValueError: pass
+            try: self.kill_process(int(item.text()))
+            except ValueError: pass
 
 class TuningMixin:
     def init_tuning_tab(self):
