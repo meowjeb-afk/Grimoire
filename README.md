@@ -23,7 +23,8 @@ Grimoire organizes its core system hooks into specialized sub-modules:
 
 The architecture maintains strict decoupling between the graphical rendering engine and background thread executors:
 
-```text
+```
+
 Grimoire/
 ├── main.py                  # Auto-elevated master bootloader & system tray layer
 ├── ui_dashboard.py          # Asynchronous, multi-tab PyQt6 UI Control panel
