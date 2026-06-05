@@ -10,13 +10,12 @@ from PyQt6.QtWidgets import (
     QCheckBox, QTabWidget, QLineEdit, QTextEdit, QFrame, QSlider, QMessageBox, 
     QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QSizePolicy
 )
-from PyQt6.QtCore import Qt, QPoint, QTimer
-from PyQt6.QtGui import QPixmap, QPainter, QColor, QPen, QFont
+from PyQt6.QtCore import Qt
 
 # Import local modules
 from core.ai_suite import DesignSuite, AdvancedDesignExtensions, HEAVY_DEPS_AVAILABLE
 from core.workers import ArcaneWorker, TelemetrySampler
-from ui.custom_widgets import ColorPreservingLabel, PerformanceChart, GrimoireNavButton, ArcaneSystemVisualizer
+from ui.custom_widgets import ColorPreservingLabel, PerformanceChart, GrimoireNavButton
 from ui.tabs import DashboardMixin, FileAlchemyMixin, VisualAlchemyMixin, DeploymentMixin, TaskViewerMixin, TuningMixin
 from PIL import Image, ImageOps, ImageFilter, ImageEnhance
 
@@ -40,14 +39,14 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
         
         # Initialize AI Suites
         self.design_suite = None; self.advanced_extensions = None
-        self.HEAVY_DEPS_AVAILABLE = HEAVY_DEPS_AVAILABLE # Expose to tabs
         if HEAVY_DEPS_AVAILABLE:
             try:
                 self.design_suite = DesignSuite()
                 self.advanced_extensions = AdvancedDesignExtensions()
                 print("✓ AI Design Suites loaded successfully.")
             except Exception as e:
-                print(f"⚠️ AI Design Suites failed to initialize: {e}")
+                print(f"️ AI Design Suites failed to initialize: {e}")
+
         self.main_container = QWidget(); self.main_container.setObjectName("MainContainer"); self.setCentralWidget(self.main_container)
         master_vertical = QVBoxLayout(self.main_container); master_vertical.setContentsMargins(0, 0, 0, 0); master_vertical.setSpacing(0)
         self.init_custom_title_bar(master_vertical)
@@ -56,13 +55,11 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
         self.workspace_stack = QTabWidget()
         if self.workspace_stack.tabBar() is not None: self.workspace_stack.tabBar().hide()
         content_layout.addWidget(self.workspace_stack, stretch=1)
-        self.right_panel_frame = QFrame(); self.right_panel_frame.setFixedWidth(0); self.right_panel_frame.hide(); content_layout.addWidget(self.right_panel_frame, stretch=0)
 
         # Initialize Tabs via Mixins
         self.init_core_tab(); self.init_alchemy_tab(); self.init_visual_alchemy_tab()
         self.init_deployment_architect_tab(); self.init_task_viewer_tab(); self.init_tuning_tab()
-        self.workspace_stack.currentChanged.connect(self.toggle_right_panel_visibility)
-        self.init_status_bar(master_vertical); self.apply_theme(); self.right_panel_frame.hide()
+        self.init_status_bar(master_vertical); self.apply_theme()
 
         self.telemetry_state = {"cpu": 0.0, "memory": 0.0, "swap": 0.0}
         self.asset_state = {"path": None, "message": "[ Waiting for Asset ]"}
@@ -96,7 +93,8 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
             if edge == 1: new_x += delta.x(); new_y += delta.y(); new_w -= delta.x(); new_h -= delta.y()
             elif edge == 2: new_y += delta.y(); new_w += delta.x(); new_h -= delta.y()
             elif edge == 3: new_x += delta.x(); new_w -= delta.x(); new_h += delta.y()
-            elif edge == 4: new_w += delta.x(); new_h += delta.y()            elif edge == 5: new_y += delta.y(); new_h -= delta.y()
+            elif edge == 4: new_w += delta.x(); new_h += delta.y()
+            elif edge == 5: new_y += delta.y(); new_h -= delta.y()
             elif edge == 6: new_h += delta.y()
             elif edge == 7: new_x += delta.x(); new_w -= delta.x()
             elif edge == 8: new_w += delta.x()
@@ -129,10 +127,12 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
 
     # --- Telemetry & UI Updates ---
     def update_main_dashboard(self, cpu, mem, swap): self.telemetry_state.update({"cpu": cpu, "memory": mem, "swap": swap}); self.refresh_telemetry_view()
+    
     def update_visualizer_matrix(self, data):
+        # Cleaned up: Removed dead visualizer matrix update
         if data is None: data = {"processes": [], "process_count": 0}
-        if hasattr(self, 'visualizer'): self.visualizer.set_internal_data(data)
         self.process_state["rows"] = data.get('processes', []); self.refresh_process_view()
+        
     def refresh_telemetry_view(self):
         if hasattr(self, 'dashboard_stat_labels'):
             self.dashboard_stat_labels['cpu'].setText(f"{self.telemetry_state['cpu']:.1f}%")
@@ -145,7 +145,8 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
         if hasattr(self, 'process_table'): self.populate_process_table(self.process_state["rows"])
     def populate_process_table(self, processes):
         processes = sorted(processes, key=lambda item: item.get('cpu_percent', 0), reverse=True)[:25]
-        self.process_table.setRowCount(len(processes))        if not processes:
+        self.process_table.setRowCount(len(processes))
+        if not processes:
             self.process_table.setRowCount(1); empty_item = QTableWidgetItem("No active processes..."); self.process_table.setItem(0, 0, empty_item); self.process_table.setSpan(0, 0, 1, 5); return
         for row, proc in enumerate(processes):
             self.process_table.setItem(row, 0, QTableWidgetItem(str(proc.get('pid', ''))))
@@ -189,12 +190,12 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
     def switch_workspace_view(self, index):
         self.workspace_stack.setCurrentIndex(index)
         for i, btn in enumerate(self.nav_buttons): btn.setChecked(i == index)
-    def toggle_right_panel_visibility(self, index): self.right_panel_frame.hide()
 
     # --- Status Bar ---
     def init_status_bar(self, parent_layout):
         self.status_bar = QFrame(); self.status_bar.setObjectName("StatusBar")
-        status_layout = QHBoxLayout(self.status_bar); status_layout.setContentsMargins(16, 4, 16, 4); status_layout.setSpacing(16)        status_dot = QLabel("●"); status_dot.setStyleSheet("color: #61ffcf; font-size: 10px;"); status_layout.addWidget(status_dot)
+        status_layout = QHBoxLayout(self.status_bar); status_layout.setContentsMargins(16, 4, 16, 4); status_layout.setSpacing(16)
+        status_dot = QLabel("●"); status_dot.setStyleSheet("color: #61ffcf; font-size: 10px;"); status_layout.addWidget(status_dot)
         status_lbl = QLabel("Grimoire Shell Active"); status_lbl.setStyleSheet("color: #645585; font-size: 10px;"); status_layout.addWidget(status_lbl); status_layout.addStretch()
         self.status_cpu_lbl = QLabel("CPU --%"); self.status_cpu_lbl.setStyleSheet("color: #7b61ff; font-size: 10px; font-family: 'Consolas'; font-weight: bold;"); status_layout.addWidget(self.status_cpu_lbl)
         self.status_mem_lbl = QLabel("MEM --%"); self.status_mem_lbl.setStyleSheet("color: #61ffcf; font-size: 10px; font-family: 'Consolas'; font-weight: bold;"); status_layout.addWidget(self.status_mem_lbl); status_layout.addStretch()
@@ -203,7 +204,7 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
 
     # --- Async Worker & Helpers ---
     def cast_asynchronously(self, target_function, *args):
-        if hasattr(self, 'visualizer'): self.visualizer.trigger_pulse()
+        # Cleaned up: Removed dead visualizer pulse trigger
         self.worker = ArcaneWorker(target_function, *args)
         self.worker.manifest_complete.connect(self.display_output)
         self.worker.start()
@@ -243,9 +244,8 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
     def refresh_preview_view(self):
         if not hasattr(self, 'preview_window') or self.edited_image is None: return
         img_byte_arr = io.BytesIO(); self.edited_image.save(img_byte_arr, format='PNG'); img_byte_arr.seek(0)
-        pixmap = QPixmap(); pixmap.loadFromData(img_byte_arr.getvalue())        self.preview_window.setPixmap(pixmap.scaled(self.preview_window.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-
-    def update_preview_from_pil(self): self.refresh_preview_view()
+        pixmap = QPixmap(); pixmap.loadFromData(img_byte_arr.getvalue())
+        self.preview_window.setPixmap(pixmap.scaled(self.preview_window.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
     def save_current_image(self):
         if self.edited_image is None: QMessageBox.warning(self, "Save Error", "No image to save."); return
@@ -269,44 +269,45 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
 
     def reset_image(self):
         if self.current_image is None: return
-        self.edited_image = self.current_image.copy(); self.update_preview_from_pil(); self.log_output("✓ Reset to original")
+        self.edited_image = self.current_image.copy(); self.refresh_preview_view(); self.log_output("✓ Reset to original")
 
     # --- PIL Image Editing Methods ---
     def apply_grayscale(self):
         if self.edited_image is None: return
-        self.edited_image = self.edited_image.convert('L').convert('RGB'); self.update_preview_from_pil()
+        self.edited_image = self.edited_image.convert('L').convert('RGB'); self.refresh_preview_view()
     def apply_sepia(self):
         if self.edited_image is None: return
         img_array = np.array(self.edited_image)
         sepia_matrix = np.array([[0.393, 0.769, 0.189], [0.349, 0.686, 0.168], [0.272, 0.534, 0.131]])
         sepia_array = np.clip(np.dot(img_array[..., :3], sepia_matrix.T), 0, 255).astype(np.uint8)
-        self.edited_image = Image.fromarray(sepia_array); self.update_preview_from_pil()
+        self.edited_image = Image.fromarray(sepia_array); self.refresh_preview_view()
     def apply_blur(self, radius=2):
         if self.edited_image is None: return
-        self.edited_image = self.edited_image.filter(ImageFilter.GaussianBlur(radius=radius)); self.update_preview_from_pil()
+        self.edited_image = self.edited_image.filter(ImageFilter.GaussianBlur(radius=radius)); self.refresh_preview_view()
     def apply_sharpen(self, factor=1.5):
         if self.edited_image is None: return
-        enhancer = ImageEnhance.Sharpness(self.edited_image); self.edited_image = enhancer.enhance(factor); self.update_preview_from_pil()
+        enhancer = ImageEnhance.Sharpness(self.edited_image); self.edited_image = enhancer.enhance(factor); self.refresh_preview_view()
     def adjust_brightness(self, value):
         if self.edited_image is None: return
-        enhancer = ImageEnhance.Brightness(self.edited_image); self.edited_image = enhancer.enhance(value / 100.0); self.update_preview_from_pil()
+        enhancer = ImageEnhance.Brightness(self.edited_image); self.edited_image = enhancer.enhance(value / 100.0); self.refresh_preview_view()
     def adjust_contrast(self, value):
         if self.edited_image is None: return
-        enhancer = ImageEnhance.Contrast(self.edited_image); self.edited_image = enhancer.enhance(value / 100.0); self.update_preview_from_pil()    def rotate_image(self, angle):
+        enhancer = ImageEnhance.Contrast(self.edited_image); self.edited_image = enhancer.enhance(value / 100.0); self.refresh_preview_view()
+    def rotate_image(self, angle):
         if self.edited_image is None: return
-        self.edited_image = self.edited_image.rotate(-angle, expand=True); self.update_preview_from_pil()
+        self.edited_image = self.edited_image.rotate(-angle, expand=True); self.refresh_preview_view()
     def flip_image(self, direction='horizontal'):
         if self.edited_image is None: return
         self.edited_image = ImageOps.mirror(self.edited_image) if direction == 'horizontal' else ImageOps.flip(self.edited_image)
-        self.update_preview_from_pil()
+        self.refresh_preview_view()
     def resize_image(self, width, height, maintain_aspect=True):
         if self.edited_image is None: return
         if maintain_aspect: self.edited_image.thumbnail((width, height))
         else: self.edited_image = self.edited_image.resize((width, height), Image.Resampling.LANCZOS)
-        self.update_preview_from_pil()
+        self.refresh_preview_view()
     def invert_colors(self):
         if self.edited_image is None: return
-        self.edited_image = ImageOps.invert(self.edited_image.convert('RGB')); self.update_preview_from_pil()
+        self.edited_image = ImageOps.invert(self.edited_image.convert('RGB')); self.refresh_preview_view()
 
     # --- AI Execution Methods ---
     def _get_output_path(self, suffix):
@@ -341,7 +342,8 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
     def run_style_transfer(self):
         if not self.design_suite or not self.current_image_path: QMessageBox.warning(self, "No Image", "Load an image first."); return
         output_path = self._get_output_path("styled.png")
-        def task(): return self.design_suite.style_transfer_refiner(self.current_image_path, self.txt_style_prompt.text(), output_path)        self.cast_asynchronously(task)
+        def task(): return self.design_suite.style_transfer_refiner(self.current_image_path, self.txt_style_prompt.text(), output_path)
+        self.cast_asynchronously(task)
 
     def run_context_inpaint(self):
         if not self.design_suite or not self.current_image_path: QMessageBox.warning(self, "No Image", "Load an image first."); return
@@ -390,7 +392,8 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
             QPushButton#ActionButton { background-color: #211936; color: #7b61ff; font-weight: 600; border: 1px solid #322652; border-radius: 8px; padding: 8px 16px; font-family: 'Segoe UI'; font-size: 11px; }
             QPushButton#ActionButton:hover { background-color: #7b61ff; color: #ffffff; border-color: #7b61ff; }
             QPushButton#SecondaryButton { background-color: #1e1730; color: #8c7fa6; font-weight: 500; border: 1px solid #2d2349; border-radius: 6px; padding: 6px 12px; font-family: 'Segoe UI'; font-size: 10px; }
-            QPushButton#SecondaryButton:hover { background-color: #251d3a; color: #a397bf; border-color: #7b61ff; }            QPushButton#TitleMinButton, QPushButton#TitleMaxButton, QPushButton#TitleCloseButton { background-color: transparent; color: #8c7fa6; border: none; border-radius: 4px; padding: 4px; font-family: 'Segoe UI'; font-size: 14px; font-weight: bold; }
+            QPushButton#SecondaryButton:hover { background-color: #251d3a; color: #a397bf; border-color: #7b61ff; }
+            QPushButton#TitleMinButton, QPushButton#TitleMaxButton, QPushButton#TitleCloseButton { background-color: transparent; color: #8c7fa6; border: none; border-radius: 4px; padding: 4px; font-family: 'Segoe UI'; font-size: 14px; font-weight: bold; }
             QPushButton#TitleMinButton:hover, QPushButton#TitleMaxButton:hover { background-color: #2d2349; color: #7b61ff; }
             QPushButton#TitleCloseButton:hover { background-color: #ff4444; color: #ffffff; }
             QTabWidget::panel { background-color: #0b0813; border: none; }
@@ -403,41 +406,12 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
             QCheckBox::indicator:checked { background: #7b61ff; border-color: #7b61ff; }
             QTableWidget { background-color: #0e0a19; color: #c9bedf; border: 1px solid #1f1833; border-radius: 8px; gridline-color: #1a1430; font-size: 10px; }
             QHeaderView::section { background-color: #171226; color: #7b61ff; padding: 8px; border: none; font-weight: bold; font-size: 10px; font-family: 'Segoe UI'; }
-            /* ==========================================
-               CUSTOM SCROLLBARS
-               ========================================== */
-            QScrollArea {
-                background-color: transparent;
-                border: none;
-            }
             
-            QScrollBar:vertical {
-                border: none;
-                background: #0b0813; /* Matches main background */
-                width: 8px;
-                margin: 0;
-                border-radius: 4px;
-            }
-            
-            QScrollBar::handle:vertical {
-                background: #2d2349; /* Dark purple track handle */
-                min-height: 30px;
-                border-radius: 4px;
-                margin: 2px;
-            }
-            
-            QScrollBar::handle:vertical:hover {
-                background: #7b61ff; /* Bright purple on hover */
-            }
-            
-            /* Hide the default up/down arrows for a cleaner look */
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                height: 0px;
-                width: 0px;
-            }
-            
-            /* Make the empty track area transparent */
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-                background: none;
-            }
+            /* Custom Scrollbars */
+            QScrollArea { background-color: transparent; border: none; }
+            QScrollBar:vertical { border: none; background: #0b0813; width: 8px; margin: 0; border-radius: 4px; }
+            QScrollBar::handle:vertical { background: #2d2349; min-height: 30px; border-radius: 4px; margin: 2px; }
+            QScrollBar::handle:vertical:hover { background: #7b61ff; }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }
         """)
