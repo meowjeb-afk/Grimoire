@@ -403,4 +403,41 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
             QCheckBox::indicator:checked { background: #7b61ff; border-color: #7b61ff; }
             QTableWidget { background-color: #0e0a19; color: #c9bedf; border: 1px solid #1f1833; border-radius: 8px; gridline-color: #1a1430; font-size: 10px; }
             QHeaderView::section { background-color: #171226; color: #7b61ff; padding: 8px; border: none; font-weight: bold; font-size: 10px; font-family: 'Segoe UI'; }
+            /* ==========================================
+               CUSTOM SCROLLBARS
+               ========================================== */
+            QScrollArea {
+                background-color: transparent;
+                border: none;
+            }
+            
+            QScrollBar:vertical {
+                border: none;
+                background: #0b0813; /* Matches main background */
+                width: 8px;
+                margin: 0;
+                border-radius: 4px;
+            }
+            
+            QScrollBar::handle:vertical {
+                background: #2d2349; /* Dark purple track handle */
+                min-height: 30px;
+                border-radius: 4px;
+                margin: 2px;
+            }
+            
+            QScrollBar::handle:vertical:hover {
+                background: #7b61ff; /* Bright purple on hover */
+            }
+            
+            /* Hide the default up/down arrows for a cleaner look */
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+                width: 0px;
+            }
+            
+            /* Make the empty track area transparent */
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
         """)
