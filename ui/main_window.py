@@ -8,15 +8,23 @@ from datetime import datetime
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, 
     QCheckBox, QTabWidget, QLineEdit, QTextEdit, QFrame, QSlider, QMessageBox, 
-    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QSizePolicy
+    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QSizePolicy,
+    QListWidget  # <-- ADD THIS
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QGuiApplication  # <-- ADD QGuiApplication
+from PyQt6.QtGui import QPixmap
 
 # Import local modules
 from core.ai_suite import DesignSuite, AdvancedDesignExtensions, HEAVY_DEPS_AVAILABLE
 from core.workers import ArcaneWorker, TelemetrySampler
 from ui.custom_widgets import ColorPreservingLabel, PerformanceChart, GrimoireNavButton
-from ui.tabs import DashboardMixin, FileAlchemyMixin, VisualAlchemyMixin, DeploymentMixin, TaskViewerMixin, TuningMixin
+from ui.tabs import (DashboardMixin, FileAlchemyMixin, VisualAlchemyMixin, DeploymentMixin, 
+                     TaskViewerMixin, TuningMixin, OpticalScryingMixin, NetworkScryingMixin, 
+                     AutomationWeaverMixin, ClipboardGrimoireMixin)  # <-- UPDATED
+from incantations.optical_scrying import OpticalScrying  # <-- ADD
+from incantations.network_scrying import NetworkScrying  # <-- ADD
+from incantations.automation_weaver import AutomationWeaver  # <-- ADD
+from incantations.clipboard_grimoire import ClipboardGrimoire  # <-- ADD
 from PIL import Image, ImageOps, ImageFilter, ImageEnhance
 
 class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchemyMixin, DeploymentMixin, TaskViewerMixin, TuningMixin):
