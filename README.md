@@ -1,5 +1,7 @@
 # Grimoire 📖✨
 
+(Work in Progress)
+
 **Grimoire** is an open-source, portable, administrative optimization suite and custom Windows shell utility powered by Python and PyQt6. Designed for creators, developers, and power users, Grimoire acts as an automated "book of spells"—running natively in the Windows system tray to execute heavy OS automation, privacy hardening, system debloating, and local machine learning tasks.
 
 By decoupling the high-performance system automation backend from the graphical user interface via asynchronous thread pools, Grimoire maintains a fluid, low-overhead system footprint without sacrificing multi-layered operational stability.
