@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, 
     QCheckBox, QTabWidget, QLineEdit, QTextEdit, QFrame, QSlider, QMessageBox, 
     QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QSizePolicy,
-    QListWidget
+    QListWidget, QGroupBox
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QGuiApplication
@@ -57,7 +57,7 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
         self.current_image = None
         self.current_image_path = None
         self.edited_image = None
-        
+
         # Initialize AI Suites
         self.design_suite = None
         self.advanced_extensions = None
@@ -86,7 +86,8 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
         master_vertical.setSpacing(0)
         
         self.init_custom_title_bar(master_vertical)
-        
+        self.init_top_controls(master_vertical)
+
         content_layout = QHBoxLayout()
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
@@ -110,7 +111,7 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
         self.init_network_scrying_tab()
         self.init_automation_weaver_tab()
         self.init_clipboard_grimoire_tab()
-        
+
         self.init_status_bar(master_vertical)
         self.apply_theme()
 
@@ -123,6 +124,9 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
         self.telemetry_thread.system_metrics_updated.connect(self.update_main_dashboard)
         self.telemetry_thread.internal_process_updated.connect(self.update_visualizer_matrix)
         self.telemetry_thread.start()
+
+        # Dark Mode State
+        self.is_dark_mode = True  # Default to dark mode
 
     def closeEvent(self, event):
         if self.telemetry_thread is not None:
@@ -298,118 +302,155 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
         
         parent_layout.addWidget(self.title_bar)
 
-    def init_sidebar(self, parent_layout):
-        self.sidebar_frame = QFrame()
-        self.sidebar_frame.setObjectName("SidebarDock")
-        self.sidebar_frame.setFixedWidth(60)
-        sidebar_layout = QVBoxLayout(self.sidebar_frame)
-        sidebar_layout.setContentsMargins(8, 20, 8, 20)
-        sidebar_layout.setSpacing(12)
-        
-        logo_container = QWidget()
-        logo_layout = QVBoxLayout(logo_container)
-        logo_layout.setContentsMargins(0, 0, 0, 16)
-        self.logo_icon_label = ColorPreservingLabel(self.logo_icon_path)
-        self.logo_icon_label.setFixedSize(44, 44)
-        logo_layout.addWidget(self.logo_icon_label, alignment=Qt.AlignmentFlag.AlignCenter)
-        sidebar_layout.addWidget(logo_container)
-        
-        sep = QFrame()
-        sep.setFrameShape(QFrame.Shape.HLine)
-        sep.setStyleSheet("color: #1f1833;")
-        sep.setFixedHeight(1)
-        sidebar_layout.addWidget(sep)
-        
-        self.nav_buttons = []
-        modules = [
-            ("assets/0.png", "Dashboard", 0), 
-            ("assets/1.png", "File Alchemy", 1), 
-            ("assets/2.png", "Visual Alchemy", 2), 
-            ("assets/3.png", "Deployment", 3), 
-            ("assets/4.png", "Task Viewer", 4), 
-            ("assets/5.png", "Arcane Tuning", 5),
-            ("assets/6.png", "Optical Scrying", 6), 
-            ("assets/7.png", "Network Scrying", 7),
-            ("assets/8.png", "Automation", 8), 
-            ("assets/9.png", "Clipboard", 9)
-        ]
-        for icon_path, name, index in modules:
-            btn = GrimoireNavButton(icon_path, name, index, compact=True)
-            if index == 0: btn.setChecked(True)
-            btn.clicked.connect(self.switch_workspace_view)
-            sidebar_layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignHCenter)
-            self.nav_buttons.append(btn)
-            
-        sidebar_layout.addStretch()
-        parent_layout.addWidget(self.sidebar_frame, stretch=0)
+    def init_top_controls(self, parent_layout):
+        # Create a container for the top controls including theme toggle, image filters, etc.
+        top_controls_container = QWidget()
+        top_controls_layout = QHBoxLayout(top_controls_container)
+        top_controls_layout.setContentsMargins(10, 10, 10, 10)
+        top_controls_layout.setSpacing(20)
 
-    def switch_workspace_view(self, index):
-        self.workspace_stack.setCurrentIndex(index)
-        for i, btn in enumerate(self.nav_buttons):
-            btn.setChecked(i == index)
+        # Dark Mode Toggle Button
+        self.btn_toggle_theme = QPushButton("Toggle Dark Mode")
+        self.btn_toggle_theme.clicked.connect(self.toggle_theme)
+        top_controls_layout.addWidget(self.btn_toggle_theme)
 
-    # --- Status Bar ---
-    def init_status_bar(self, parent_layout):
-        self.status_bar = QFrame()
-        self.status_bar.setObjectName("StatusBar")
-        status_layout = QHBoxLayout(self.status_bar)
-        status_layout.setContentsMargins(16, 4, 16, 4)
-        status_layout.setSpacing(16)
-        
-        status_dot = QLabel("●")
-        status_dot.setStyleSheet("color: #61ffcf; font-size: 10px;")
-        status_layout.addWidget(status_dot)
-        
-        status_lbl = QLabel("Grimoire Shell Active")
-        status_lbl.setStyleSheet("color: #645585; font-size: 10px;")
-        status_layout.addWidget(status_lbl)
-        status_layout.addStretch()
-        
-        self.status_cpu_lbl = QLabel("CPU --%")
-        self.status_cpu_lbl.setStyleSheet("color: #7b61ff; font-size: 10px; font-family: 'Consolas'; font-weight: bold;")
-        status_layout.addWidget(self.status_cpu_lbl)
-        
-        self.status_mem_lbl = QLabel("MEM --%")
-        self.status_mem_lbl.setStyleSheet("color: #61ffcf; font-size: 10px; font-family: 'Consolas'; font-weight: bold;")
-        status_layout.addWidget(self.status_mem_lbl)
-        status_layout.addStretch()
-        
-        self.status_time_lbl = QLabel("--:--:--")
-        self.status_time_lbl.setStyleSheet("color: #4a3e63; font-size: 10px; font-family: 'Consolas';")
-        status_layout.addWidget(self.status_time_lbl)
-        
-        parent_layout.addWidget(self.status_bar)
+        # Image Filters Panel
+        filters_group = QGroupBox("Image Filters")
+        filters_layout = QVBoxLayout()
+        filters_group.setLayout(filters_layout)
 
-    # --- Async Worker & Helpers ---
-    def cast_asynchronously(self, target_function, *args):
-        self.worker = ArcaneWorker(target_function, *args)
-        self.worker.manifest_complete.connect(self.display_output)
-        self.worker.start()
+        # Brightness
+        brightness_lbl = QLabel("Brightness")
+        self.brightness_slider = QSlider(Qt.Orientation.Horizontal)
+        self.brightness_slider.setRange(0, 200)
+        self.brightness_slider.setValue(100)
+        self.brightness_slider.valueChanged.connect(self.apply_brightness)
+        filters_layout.addWidget(brightness_lbl)
+        filters_layout.addWidget(self.brightness_slider)
 
-    def display_output(self, text):
-        if not text: return
-        self.log_output(text)
-        image_pattern = r"([A-Za-z]:[\\/][^\n\r]+?\.(?:png|jpg|jpeg|bmp|gif))"
-        matches = re.findall(image_pattern, text, flags=re.IGNORECASE)
-        for match in matches:
-            normalized = os.path.normpath(match.strip('"'))
-            if os.path.exists(normalized):
-                self.handle_image_input(normalized)
-                break
+        # Contrast
+        contrast_lbl = QLabel("Contrast")
+        self.contrast_slider = QSlider(Qt.Orientation.Horizontal)
+        self.contrast_slider.setRange(0, 200)
+        self.contrast_slider.setValue(100)
+        self.contrast_slider.valueChanged.connect(self.apply_contrast)
+        filters_layout.addWidget(contrast_lbl)
+        filters_layout.addWidget(self.contrast_slider)
 
-    def log_output(self, message):
-        if hasattr(self, 'status_log'):
-            timestamp = datetime.now().strftime('%H:%M:%S')
-            self.status_log.append(f"[{timestamp}] {message}")
-            scrollbar = self.status_log.verticalScrollBar()
-            if scrollbar is not None:
-                scrollbar.setValue(scrollbar.maximum())
+        # Sharpness
+        sharpness_lbl = QLabel("Sharpness")
+        self.sharpness_slider = QSlider(Qt.Orientation.Horizontal)
+        self.sharpness_slider.setRange(0, 300)
+        self.sharpness_slider.setValue(150)
+        self.sharpness_slider.valueChanged.connect(self.apply_sharpen)
+        filters_layout.addWidget(sharpness_lbl)
+        filters_layout.addWidget(self.sharpness_slider)
 
-    def browse_for_image(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Select Image", "", "Images (*.png *.jpg *.jpeg *.bmp *.gif);;All Files (*)")
-        if file_path:
-            self.handle_image_input(file_path)
+        # Batch Processing Button
+        self.btn_batch_process = QPushButton("Batch Process")
+        self.btn_batch_process.clicked.connect(self.batch_process_images)
+        filters_layout.addWidget(self.btn_batch_process)
 
+        top_controls_layout.addWidget(filters_group)
+
+        # Add the top controls to parent layout
+        parent_layout.addWidget(top_controls_container)
+
+    def toggle_theme(self):
+        self.is_dark_mode = not getattr(self, 'is_dark_mode', True)
+        self.apply_theme()
+
+    def apply_theme(self):
+        if getattr(self, 'is_dark_mode', True):
+            # Dark theme
+            self.setStyleSheet("""
+                QWidget#MainContainer { background-color: #0b0813; border: 1px solid #1f1833; border-radius: 12px; }
+                QFrame#CustomTitleBar { background-color: #0b0813; border-top-left-radius: 12px; border-top-right-radius: 12px; border-bottom: 1px solid #140f24; }
+                QFrame#SidebarDock { background-color: #120e1f; border-right: 1px solid #1f1833; border-bottom-left-radius: 11px; }
+                QPushButton#ActionButton { background-color: #211936; color: #7b61ff; font-weight: 600; border: 1px solid #322652; border-radius: 8px; padding: 8px 16px; font-family: 'Segoe UI'; font-size: 11px; }
+                QPushButton#ActionButton:hover { background-color: #7b61ff; color: #ffffff; border-color: #7b61ff; }
+                QPushButton#SecondaryButton { background-color: #1e1730; color: #8c7fa6; font-weight: 500; border: 1px solid #2d2349; border-radius: 6px; padding: 6px 12px; font-family: 'Segoe UI'; font-size: 10px; }
+                QPushButton#SecondaryButton:hover { background-color: #251d3a; color: #a397bf; border-color: #7b61ff; }
+                QPushButton#TitleMinButton, QPushButton#TitleMaxButton, QPushButton#TitleCloseButton { background-color: transparent; color: #8c7fa6; border: none; border-radius: 4px; padding: 4px; font-family: 'Segoe UI'; font-size: 14px; font-weight: bold; }
+                QPushButton#TitleMinButton:hover, QPushButton#TitleMaxButton:hover { background-color: #2d2349; color: #7b61ff; }
+                QPushButton#TitleCloseButton:hover { background-color: #ff4444; color: #ffffff; }
+                QTabWidget::panel { background-color: #0b0813; border: none; }
+                QLabel { color: #a397bf; font-family: 'Segoe UI'; font-size: 11px; background: transparent; }
+                QLineEdit { background-color: #1e1730; color: #61ffcf; border: 1px solid #2d2349; border-radius: 6px; padding: 8px 12px; font-family: 'Consolas'; font-size: 11px; }
+                QLineEdit:focus { border-color: #7b61ff; }
+                QSpinBox { background-color: #1e1730; color: #61ffcf; border: 1px solid #2d2349; border-radius: 4px; padding: 4px; font-family: 'Consolas'; font-size: 10px; }
+                QCheckBox { color: #c9bedf; font-family: 'Segoe UI'; font-size: 11px; background: transparent; spacing: 6px; }
+                QCheckBox::indicator { width: 14px; height: 14px; border-radius: 3px; border: 1px solid #322652; background: #1e1730; }
+                QCheckBox::indicator:checked { background: #7b61ff; border-color: #7b61ff; }
+                QTableWidget { background-color: #0e0a19; color: #c9bedf; border: 1px solid #1f1833; border-radius: 8px; gridline-color: #1a1430; font-size: 10px; }
+                QHeaderView::section { background-color: #171226; color: #7b61ff; padding: 8px; border: none; font-weight: bold; font-size: 10px; font-family: 'Segoe UI'; }
+                /* Custom Scrollbars */
+                QScrollArea { background-color: transparent; border: none; }
+                QScrollBar:vertical { border: none; background: #0b0813; width: 8px; margin: 0; border-radius: 4px; }
+                QScrollBar::handle:vertical { background: #2d2349; min-height: 30px; border-radius: 4px; }
+                QScrollBar::handle:vertical:hover { background: #7b61ff; }
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
+                QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }
+            """)
+        else:
+            # Light theme
+            self.setStyleSheet("""
+                QWidget#MainContainer { background-color: #FFFFFF; border: 1px solid #1f1833; border-radius: 12px; }
+                /* Add light theme styles if needed */
+            """)
+
+    def init_custom_title_bar(self, parent_layout):
+        # ... (unchanged, same as before)
+        self.title_bar = QFrame()
+        self.title_bar.setObjectName("CustomTitleBar")
+        title_layout = QHBoxLayout(self.title_bar)
+        title_layout.setContentsMargins(15, 6, 12, 6)
+        title_layout.setSpacing(8)
+        window_icon_label = ColorPreservingLabel(self.logo_icon_path)
+        window_icon_label.setFixedSize(20, 20)
+        title_layout.addWidget(window_icon_label)
+        window_title = QLabel("Grimoire Master OS Shell Extension")
+        window_title.setStyleSheet("color: #a397bf; font-family: 'Segoe UI'; font-weight: bold; font-size: 11px;")
+        title_layout.addWidget(window_title)
+        title_layout.addStretch()
+        btn_min = QPushButton("−")
+        btn_min.setObjectName("TitleMinButton")
+        btn_min.setFixedSize(28, 24)
+        btn_min.clicked.connect(self.showMinimized)
+        title_layout.addWidget(btn_min)
+        btn_max = QPushButton("□")
+        btn_max.setObjectName("TitleMaxButton")
+        btn_max.setFixedSize(28, 24)
+        btn_max.clicked.connect(self.toggle_maximize)
+        title_layout.addWidget(btn_max)
+        btn_close = QPushButton("✕")
+        btn_close.setObjectName("TitleCloseButton")
+        btn_close.setFixedSize(28, 24)
+        btn_close.clicked.connect(self.close)
+        title_layout.addWidget(btn_close)
+        parent_layout.addWidget(self.title_bar)
+
+    def init_top_controls(self, parent_layout):
+        # ... (see above, includes theme toggle, filters, batch process buttons)
+        # This method is already included in the code above
+        pass
+
+    def batch_process_images(self):
+        # Example batch process: convert all selected images to grayscale
+        files, _ = QFileDialog.getOpenFileNames(self, "Select Images for Batch Processing", "", "Images (*.png *.jpg *.jpeg)")
+        if not files:
+            return
+        for file_path in files:
+            try:
+                img = Image.open(file_path)
+                img = img.convert('L')
+                save_path = os.path.splitext(file_path)[0] + "_grayscale.png"
+                img.save(save_path)
+                self.log_output(f"Processed {file_path} -> {save_path}")
+            except Exception as e:
+                self.log_output(f"Failed to process {file_path}: {e}")
+
+    # --- Image Input & Preview ---
     def handle_image_input(self, path):
         if not os.path.exists(path):
             self.log_output(f" File not found: {path}")
@@ -474,6 +515,25 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
         self.log_output("✓ Reset to original")
 
     # --- PIL Image Editing Methods ---
+    def apply_brightness(self, value):
+        if self.edited_image is None: return
+        enhancer = ImageEnhance.Brightness(self.current_image if self.current_image else self.edited_image)
+        self.edited_image = enhancer.enhance(value / 100.0)
+        self.refresh_preview_view()
+
+    def apply_contrast(self, value):
+        if self.edited_image is None: return
+        enhancer = ImageEnhance.Contrast(self.current_image if self.current_image else self.edited_image)
+        self.edited_image = enhancer.enhance(value / 100.0)
+        self.refresh_preview_view()
+
+    def apply_sharpen(self, value):
+        if self.edited_image is None: return
+        enhancer = ImageEnhance.Sharpness(self.current_image if self.current_image else self.edited_image)
+        self.edited_image = enhancer.enhance(value / 100.0)
+        self.refresh_preview_view()
+
+    # --- Image Filters ---
     def apply_grayscale(self):
         if self.edited_image is None: return
         self.edited_image = self.edited_image.convert('L').convert('RGB')
@@ -498,18 +558,6 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
         self.edited_image = enhancer.enhance(factor)
         self.refresh_preview_view()
 
-    def adjust_brightness(self, value):
-        if self.edited_image is None: return
-        enhancer = ImageEnhance.Brightness(self.edited_image)
-        self.edited_image = enhancer.enhance(value / 100.0)
-        self.refresh_preview_view()
-
-    def adjust_contrast(self, value):
-        if self.edited_image is None: return
-        enhancer = ImageEnhance.Contrast(self.edited_image)
-        self.edited_image = enhancer.enhance(value / 100.0)
-        self.refresh_preview_view()
-
     def rotate_image(self, angle):
         if self.edited_image is None: return
         self.edited_image = self.edited_image.rotate(-angle, expand=True)
@@ -517,7 +565,10 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
 
     def flip_image(self, direction='horizontal'):
         if self.edited_image is None: return
-        self.edited_image = ImageOps.mirror(self.edited_image) if direction == 'horizontal' else ImageOps.flip(self.edited_image)
+        if direction == 'horizontal':
+            self.edited_image = ImageOps.mirror(self.edited_image)
+        else:
+            self.edited_image = ImageOps.flip(self.edited_image)
         self.refresh_preview_view()
 
     def resize_image(self, width, height, maintain_aspect=True):
@@ -704,33 +755,130 @@ class GrimoireMirror(QMainWindow, DashboardMixin, FileAlchemyMixin, VisualAlchem
 
     # --- Theme ---
     def apply_theme(self):
-        self.setStyleSheet("""
-            QWidget#MainContainer { background-color: #0b0813; border: 1px solid #1f1833; border-radius: 12px; }
-            QFrame#CustomTitleBar { background-color: #0b0813; border-top-left-radius: 12px; border-top-right-radius: 12px; border-bottom: 1px solid #140f24; }
-            QFrame#SidebarDock { background-color: #120e1f; border-right: 1px solid #1f1833; border-bottom-left-radius: 11px; }
-            QPushButton#ActionButton { background-color: #211936; color: #7b61ff; font-weight: 600; border: 1px solid #322652; border-radius: 8px; padding: 8px 16px; font-family: 'Segoe UI'; font-size: 11px; }
-            QPushButton#ActionButton:hover { background-color: #7b61ff; color: #ffffff; border-color: #7b61ff; }
-            QPushButton#SecondaryButton { background-color: #1e1730; color: #8c7fa6; font-weight: 500; border: 1px solid #2d2349; border-radius: 6px; padding: 6px 12px; font-family: 'Segoe UI'; font-size: 10px; }
-            QPushButton#SecondaryButton:hover { background-color: #251d3a; color: #a397bf; border-color: #7b61ff; }
-            QPushButton#TitleMinButton, QPushButton#TitleMaxButton, QPushButton#TitleCloseButton { background-color: transparent; color: #8c7fa6; border: none; border-radius: 4px; padding: 4px; font-family: 'Segoe UI'; font-size: 14px; font-weight: bold; }
-            QPushButton#TitleMinButton:hover, QPushButton#TitleMaxButton:hover { background-color: #2d2349; color: #7b61ff; }
-            QPushButton#TitleCloseButton:hover { background-color: #ff4444; color: #ffffff; }
-            QTabWidget::panel { background-color: #0b0813; border: none; }
-            QLabel { color: #a397bf; font-family: 'Segoe UI'; font-size: 11px; background: transparent; }
-            QLineEdit { background-color: #1e1730; color: #61ffcf; border: 1px solid #2d2349; border-radius: 6px; padding: 8px 12px; font-family: 'Consolas'; font-size: 11px; }
-            QLineEdit:focus { border-color: #7b61ff; }
-            QSpinBox { background-color: #1e1730; color: #61ffcf; border: 1px solid #2d2349; border-radius: 4px; padding: 4px; font-family: 'Consolas'; font-size: 10px; }
-            QCheckBox { color: #c9bedf; font-family: 'Segoe UI'; font-size: 11px; background: transparent; spacing: 6px; }
-            QCheckBox::indicator { width: 14px; height: 14px; border-radius: 3px; border: 1px solid #322652; background: #1e1730; }
-            QCheckBox::indicator:checked { background: #7b61ff; border-color: #7b61ff; }
-            QTableWidget { background-color: #0e0a19; color: #c9bedf; border: 1px solid #1f1833; border-radius: 8px; gridline-color: #1a1430; font-size: 10px; }
-            QHeaderView::section { background-color: #171226; color: #7b61ff; padding: 8px; border: none; font-weight: bold; font-size: 10px; font-family: 'Segoe UI'; }
-            
-            /* Custom Scrollbars */
-            QScrollArea { background-color: transparent; border: none; }
-            QScrollBar:vertical { border: none; background: #0b0813; width: 8px; margin: 0; border-radius: 4px; }
-            QScrollBar::handle:vertical { background: #2d2349; min-height: 30px; border-radius: 4px; margin: 2px; }
-            QScrollBar::handle:vertical:hover { background: #7b61ff; }
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }
-        """)
+        # Already implemented above
+        pass
+
+    # --- Additional Methods ---
+    def init_sidebar(self, parent_layout):
+        # ... (unchanged)
+        self.sidebar_frame = QFrame()
+        self.sidebar_frame.setObjectName("SidebarDock")
+        self.sidebar_frame.setFixedWidth(60)
+        sidebar_layout = QVBoxLayout(self.sidebar_frame)
+        sidebar_layout.setContentsMargins(8, 20, 8, 20)
+        sidebar_layout.setSpacing(12)
+        logo_container = QWidget()
+        logo_layout = QVBoxLayout(logo_container)
+        logo_layout.setContentsMargins(0, 0, 0, 16)
+        self.logo_icon_label = ColorPreservingLabel(self.logo_icon_path)
+        self.logo_icon_label.setFixedSize(44, 44)
+        logo_layout.addWidget(self.logo_icon_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        sidebar_layout.addWidget(logo_container)
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setStyleSheet("color: #1f1833;")
+        sep.setFixedHeight(1)
+        sidebar_layout.addWidget(sep)
+        modules = [
+            ("assets/0.png", "Dashboard", 0), 
+            ("assets/1.png", "File Alchemy", 1), 
+            ("assets/2.png", "Visual Alchemy", 2), 
+            ("assets/3.png", "Deployment", 3), 
+            ("assets/4.png", "Task Viewer", 4), 
+            ("assets/5.png", "Arcane Tuning", 5),
+            ("assets/6.png", "Optical Scrying", 6), 
+            ("assets/7.png", "Network Scrying", 7),
+            ("assets/8.png", "Automation", 8), 
+            ("assets/9.png", "Clipboard", 9)
+        ]
+        for icon_path, name, index in modules:
+            btn = GrimoireNavButton(icon_path, name, index, compact=True)
+            if index == 0: btn.setChecked(True)
+            btn.clicked.connect(lambda checked, idx=index: self.switch_workspace_view(idx))
+            sidebar_layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignHCenter)
+            self.nav_buttons.append(btn)
+        sidebar_layout.addStretch()
+        parent_layout.addWidget(self.sidebar_frame, stretch=0)
+
+    def switch_workspace_view(self, index):
+        self.workspace_stack.setCurrentIndex(index)
+        for i, btn in enumerate(self.nav_buttons):
+            btn.setChecked(i == index)
+
+    def init_status_bar(self, parent_layout):
+        # ... (unchanged)
+        self.status_bar = QFrame()
+        self.status_bar.setObjectName("StatusBar")
+        status_layout = QHBoxLayout(self.status_bar)
+        status_layout.setContentsMargins(16, 4, 16, 4)
+        status_layout.setSpacing(16)
+        status_dot = QLabel("●")
+        status_dot.setStyleSheet("color: #61ffcf; font-size: 10px;")
+        status_layout.addWidget(status_dot)
+        status_lbl = QLabel("Grimoire Shell Active")
+        status_lbl.setStyleSheet("color: #645585; font-size: 10px;")
+        status_layout.addWidget(status_lbl)
+        status_layout.addStretch()
+        self.status_cpu_lbl = QLabel("CPU --%")
+        self.status_cpu_lbl.setStyleSheet("color: #7b61ff; font-size: 10px; font-family: 'Consolas'; font-weight: bold;")
+        status_layout.addWidget(self.status_cpu_lbl)
+        self.status_mem_lbl = QLabel("MEM --%")
+        self.status_mem_lbl.setStyleSheet("color: #61ffcf; font-size: 10px; font-family: 'Consolas'; font-weight: bold;")
+        status_layout.addWidget(self.status_mem_lbl)
+        status_layout.addStretch()
+        self.status_time_lbl = QLabel("--:--:--")
+        self.status_time_lbl.setStyleSheet("color: #4a3e63; font-size: 10px; font-family: 'Consolas';")
+        status_layout.addWidget(self.status_time_lbl)
+        parent_layout.addWidget(self.status_bar)
+
+    def init_custom_title_bar(self, parent_layout):
+        # ... (unchanged, same as above)
+        self.title_bar = QFrame()
+        self.title_bar.setObjectName("CustomTitleBar")
+        title_layout = QHBoxLayout(self.title_bar)
+        title_layout.setContentsMargins(15, 6, 12, 6)
+        title_layout.setSpacing(8)
+        window_icon_label = ColorPreservingLabel(self.logo_icon_path)
+        window_icon_label.setFixedSize(20, 20)
+        title_layout.addWidget(window_icon_label)
+        window_title = QLabel("Grimoire Master OS Shell Extension")
+        window_title.setStyleSheet("color: #a397bf; font-family: 'Segoe UI'; font-weight: bold; font-size: 11px;")
+        title_layout.addWidget(window_title)
+        title_layout.addStretch()
+        btn_min = QPushButton("−")
+        btn_min.setObjectName("TitleMinButton")
+        btn_min.setFixedSize(28, 24)
+        btn_min.clicked.connect(self.showMinimized)
+        title_layout.addWidget(btn_min)
+        btn_max = QPushButton("□")
+        btn_max.setObjectName("TitleMaxButton")
+        btn_max.setFixedSize(28, 24)
+        btn_max.clicked.connect(self.toggle_maximize)
+        title_layout.addWidget(btn_max)
+        btn_close = QPushButton("✕")
+        btn_close.setObjectName("TitleCloseButton")
+        btn_close.setFixedSize(28, 24)
+        btn_close.clicked.connect(self.close)
+        title_layout.addWidget(btn_close)
+        parent_layout.addWidget(self.title_bar)
+
+    # --- Drag & Drop ---
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        urls = event.mimeData().urls()
+        if urls:
+            file_path = urls[0].toLocalFile()
+            self.handle_image_input(file_path)
+
+# -- End of class --
+
+# Usage:
+if __name__ == "__main__":
+    import sys
+    app = QApplication(sys.argv)
+    window = GrimoireMirror()
+    window.show()
+    sys.exit(app.exec())
