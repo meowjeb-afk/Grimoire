@@ -19,7 +19,7 @@
 
 ## 📜 About The Grimoire
 
-**Grimoire Mirror** is not just another system utility; it is a unified command center designed for developers, power users, and digital artisans. Built with a modular, multithreaded architecture in **Python** and **PyQt6**, it ensures that heavy operations (like AI image generation or bulk software installation) never freeze the user interface.
+**Grimoire** is not just another system utility; it is a unified command center designed for developers, power users, and digital artisans. Built with a modular, multithreaded architecture in **Python** and **PyQt6**, it ensures that heavy operations (like AI image generation or bulk software installation) never freeze the user interface. And so much more, like the highly advanced Visual Alchemy for all your image editing needs.
 
 From securely shredding sensitive files to deploying local LLMs and managing encrypted secrets, the Grimoire provides a sleek, dark-themed interface to wield total control over your digital environment.
 
@@ -65,8 +65,8 @@ Before summoning the Grimoire, ensure your system meets these requirements:
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/[Your-Username]/grimoire-mirror.git
-   cd grimoire-mirror
+   git clone https://github.com/[Your-Username]/grimoire.git
+   cd grimoire
    ```
 
 2. **Create and Activate a Virtual Environment (Recommended):**
@@ -103,7 +103,7 @@ To compile the Grimoire into a standalone, portable executable without requiring
    ```bash
    pyinstaller grimoire.spec --clean
    ```
-3. Your standalone application will be located in the `dist/GrimoireMirror/` directory. You can zip this folder and distribute it anywhere.
+3. Your standalone application will be located in the `dist/Grimoire/` directory. You can zip this folder and distribute it anywhere.
 
 ---
 
@@ -112,7 +112,7 @@ To compile the Grimoire into a standalone, portable executable without requiring
 The codebase is strictly modular, separating UI logic from backend processing to ensure a buttery-smooth 60 FPS interface.
 
 ```text
-grimoire-mirror/
+Grimoire/
 ├── main.py                  # Application entry point
 ├── grimoire.spec            # PyInstaller build configuration
 ├── requirements.txt         # Python dependencies
